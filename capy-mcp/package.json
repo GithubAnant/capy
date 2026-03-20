@@ -1,0 +1,32 @@
+{
+  "name": "capy-mcp",
+  "version": "0.1.0",
+  "description": "Extract your design system and hand it to AI coding agents as structured context",
+  "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "capy": "./bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "glob": "^11.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "license": "MIT"
+}
