@@ -3,10 +3,10 @@
 import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import HeroPreview from "@/components/sections/HeroPreview";
-import UseCasesSection from "@/components/sections/UseCasesSection";
 import PricingSection from "@/components/sections/PricingSection";
 import FAQSection from "@/components/sections/FAQSection";
 import Footer from "@/components/layout/Footer";
+import FeaturesSection from "@/components/sections/FeaturesSection";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
       <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col gap-16 px-4 pb-20 pt-16 md:px-6">
         <HeroSection />
         <HeroPreview />
-        <UseCasesSection />
+        <FeaturesSection />
         <PricingSection />
         <FAQSection />
       </main>

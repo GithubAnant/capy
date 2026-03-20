@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
-const useCases = [
+const features = [
   {
     label: "Full-stack",
     title: "Full-stack development",
@@ -34,21 +34,21 @@ const useCases = [
   },
 ];
 
-export default function UseCasesSection() {
+export default function FeaturesSection() {
   const [active, setActive] = useState(0);
-  const current = useCases[active];
+  const current = features[active];
 
   return (
     <section>
-      <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Use cases"}</p>
+      <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Features"}</p>
       <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
-        One tool. <span className="text-[#858585]">Every use case.</span>
+        One tool. <span className="text-[#858585]">Every feature.</span>
       </h2>
 
       <div className="mt-5 inline-flex rounded-[1.1rem] bg-[#171615] p-1.5">
-        {useCases.map((uc, i) => (
+        {features.map((feature, i) => (
           <button
-            key={uc.label}
+            key={feature.label}
             type="button"
             onClick={() => setActive(i)}
             className={`cursor-pointer rounded-[0.85rem] px-3 py-2 text-[0.8rem] font-medium md:px-4 ${
@@ -57,7 +57,7 @@ export default function UseCasesSection() {
                 : "text-[#858585] hover:text-[#F0F0F3]"
             }`}
           >
-            {uc.label}
+            {feature.label}
           </button>
         ))}
       </div>

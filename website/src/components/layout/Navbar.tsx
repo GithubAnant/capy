@@ -38,10 +38,10 @@ export default function Navbar() {
   };
 
   return (
-    <header className="fixed left-0 top-2 z-40 w-full bg-black/95">
+    <header className="fixed left-0 top-0 z-40 w-full bg-black">
       <div className="mx-auto flex h-14 w-full max-w-270 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="text-[1.3rem] font-normal leading-none text-[#F0F0F3] md:text-[1.45rem]">
-          Capy
+        <Link href="/" className="font-display text-[1.15rem] leading-none text-[#F0F0F3]">
+          capy
         </Link>
 
         <nav className="hidden items-center gap-5 md:flex">
