@@ -1,10 +1,9 @@
 "use client";
 
 import Navbar from "@/components/layout/Navbar";
-import CoreFeaturesSection from "@/components/sections/CoreFeaturesSection";
 import HeroSection from "@/components/sections/HeroSection";
 import HeroPreview from "@/components/sections/HeroPreview";
-import TrustedBySection from "@/components/sections/TrustedBySection";
+import UseCasesSection from "@/components/sections/UseCasesSection";
 
 export default function Home() {
   return (
@@ -15,8 +14,7 @@ export default function Home() {
       <main className="relative z-10 mx-auto flex w-full max-w-[1080px] flex-col px-4 pb-20 pt-16 md:px-6">
         <HeroSection />
         <HeroPreview />
-        <TrustedBySection />
-        <CoreFeaturesSection />
+        <UseCasesSection />
       </main>
     </div>
   );

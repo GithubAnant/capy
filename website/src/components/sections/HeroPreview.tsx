@@ -6,7 +6,7 @@ export default function HeroPreview() {
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111117]">
         <div className="relative aspect-[16/8.6] w-full">
           <Image
-            src="https://picsum.photos/1600/900?random=101"
+            src="https://framerusercontent.com/images/gcAhWkaUK37e0Uq6M2443Ldm0EI.png?width=2912&height=1632"
             alt="capy interface preview"
             fill
             className="object-cover"
@@ -15,7 +15,7 @@ export default function HeroPreview() {
 
           <div className="absolute inset-0 bg-black/36" />
 
-          <div className="absolute inset-x-[12.5%] bottom-[13%] top-[20%] overflow-hidden rounded-xl border border-white/15 bg-black/85">
+          <div className="absolute inset-x-[11.5%] bottom-[13%] top-[20%] overflow-hidden rounded-xl border border-white/15 bg-black/85">
             <div className="flex h-6 items-center justify-between border-b border-white/10 px-2.5 text-[9px] text-[#babcc8]">
               <span>Explorer</span>
               <span>capy</span>
