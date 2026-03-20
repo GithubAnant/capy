@@ -39,13 +39,13 @@ export default function UseCasesSection() {
   const current = useCases[active];
 
   return (
-    <section className="pt-20">
+    <section>
       <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Use cases"}</p>
       <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
         One tool. <span className="text-[#858585]">Every use case.</span>
       </h2>
 
-      <div className="mt-5 inline-flex rounded-[1.1rem] bg-[#121214] p-1.5">
+      <div className="mt-5 inline-flex rounded-[1.1rem] bg-[#171615] p-1.5">
         {useCases.map((uc, i) => (
           <button
             key={uc.label}
@@ -77,7 +77,7 @@ export default function UseCasesSection() {
       <div className="mt-6 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="mb-2 text-[0.78rem] text-[#858585]">{current.title}</p>
-          <p className="max-w-[56rem] text-[0.95rem] leading-[1.5] text-[#F0F0F3] md:text-[1.05rem]">
+          <p className="max-w-4xl text-[0.95rem] leading-normal text-[#F0F0F3] md:text-[1.05rem]">
             {current.description}
           </p>
         </div>

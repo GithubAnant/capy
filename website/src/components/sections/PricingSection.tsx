@@ -1,7 +1,7 @@
 export default function PricingSection() {
   const features = [
     "Unlimited everything",
-    "AI autocomplete & chat",
+    "Open-source",
     "Full codebase context",
     "Runs 100% locally",
     "No telemetry or tracking",
@@ -11,20 +11,20 @@ export default function PricingSection() {
   return (
     <section id="pricing" className="relative pb-20 pt-12">
       <p className="mb-4 text-[0.78rem] text-[#858585]">{"// Pricing"}</p>
-      <h2 className="font-display text-[2.2rem] leading-[1.15] text-[#F0F0F3] md:text-[3.2rem]">
-        Free. Forever.
+      <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
+        Free. <span className="text-[#858585]">Forever.</span>
       </h2>
-      <p className="mt-3 max-w-[28rem] text-[0.88rem] leading-[1.5] text-[#858585]">
+      <p className="mt-3 max-w-md text-[0.88rem] leading-normal text-[#858585]">
         No tiers. No upsells. Open source and locally hosted — your code never leaves your machine.
       </p>
 
-      <div className="mt-10 grid max-w-[54rem] gap-4 md:grid-cols-2">
-        <div className="rounded-[1.3rem] border border-white/10 bg-[#18181c] px-7 py-7">
+      <div className="mt-10 grid w-full gap-4 md:grid-cols-[1.15fr_1fr]">
+        <div className="rounded-[1.3rem] bg-[#171615] px-7 py-7 md:px-8 md:py-8">
           <p className="text-[0.85rem] font-medium text-[#858585]">Free</p>
 
           <div className="mt-4 flex items-baseline gap-1">
             <span className="font-display text-[3.2rem] leading-none text-[#F0F0F3]">$0</span>
-            <span className="text-[0.85rem] text-[#858585]">/month</span>
+            <span className="text-[0.85rem] text-[#858585]">/lifetime</span>
           </div>
 
           <p className="mt-3 text-[0.82rem] leading-[1.45] text-[#858585]">
@@ -57,11 +57,11 @@ export default function PricingSection() {
           </ul>
         </div>
 
-        <div className="rounded-[1.3rem] border border-white/10 bg-[#141418] px-7 py-7">
+        <div className="rounded-[1.3rem] bg-[#171615] px-7 py-7 md:px-8 md:py-8">
           <p className="text-[0.78rem] text-[#858585]">Why free forever</p>
           <h3 className="mt-2 font-display text-[1.6rem] leading-[1.15] text-[#F0F0F3]">All local. All free. All yours.</h3>
 
-          <div className="mt-5 space-y-3 text-[0.82rem] leading-[1.5] text-[#858585]">
+          <div className="mt-5 space-y-3 text-[0.82rem] leading-normal text-[#858585]">
             <p>Runs on your machine. Your code and prompts stay local.</p>
             <p>No subscriptions, no metered limits, no paywalls later.</p>
             <p>Every feature is unlocked from day one.</p>

@@ -39,12 +39,12 @@ export default function FAQSection() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section className="pt-20">
+    <section>
       <div className="flex flex-col gap-10 md:flex-row md:gap-16">
         {/* Left side */}
-        <div className="shrink-0 md:w-[340px]">
+        <div className="shrink-0 md:w-85">
           <p className="mb-3 text-[0.78rem] text-[#858585]">{"// FAQ"}</p>
-          <h2 className="font-display text-[1.6rem] font-medium leading-[1.1] text-[#F0F0F3] md:text-[2.4rem]">
+          <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
             Questions? <span className="text-[#858585]">We&apos;ve got answers.</span>
           </h2>
         </div>
@@ -54,7 +54,7 @@ export default function FAQSection() {
           {faqs.map((faq, i) => (
             <div
               key={faq.question}
-              className="rounded-xl bg-[#141418]"
+              className="rounded-xl bg-[#171615]"
             >
               <button
                 type="button"

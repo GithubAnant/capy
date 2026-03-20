@@ -1,36 +1,74 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
 const navItems = [
-  { label: "Features", href: "#use-cases" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Setup", href: "#setup" },
-  { label: "Docs", href: "#docs" },
+  { label: "Features", href: "use-cases" },
+  { label: "Setup", href: "setup" },
+  { label: "Pricing", href: "pricing" },
+  { label: "Docs", href: "docs" },
 ];
 
+function formatStars(count: number): string {
+  if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}K`;
+  return String(count);
+}
+
 export default function Navbar() {
+  const [stars, setStars] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("https://api.github.com/repos/GithubAnant/toolss")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.stargazers_count != null) {
+          setStars(formatStars(data.stargazers_count));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      history.replaceState(null, "", window.location.pathname);
+    }
+  };
+
   return (
     <header className="fixed left-0 top-2 z-40 w-full bg-black/95">
       <div className="mx-auto flex h-14 w-full max-w-270 items-center justify-between px-4 md:px-6">
-        <a href="#" className="text-[1.3rem] font-normal leading-none text-[#F0F0F3] md:text-[1.45rem]">
+        <Link href="/" className="text-[1.3rem] font-normal leading-none text-[#F0F0F3] md:text-[1.45rem]">
           Capy
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-5 md:flex">
           {navItems.map((item) => (
-            <a
+            <button
               key={item.label}
-              href={item.href}
-              className="text-[0.88rem] font-normal text-[#858585] hover:text-[#F0F0F3]"
+              type="button"
+              onClick={() => scrollTo(item.href)}
+              className="cursor-pointer text-[0.88rem] font-normal text-[#858585] hover:text-[#F0F0F3]"
             >
               {item.label}
-            </a>
+            </button>
           ))}
         </nav>
 
-        <button
-          className="rounded-full bg-[#F0F0F3] px-3.5 py-1.5 text-[0.8rem] font-medium text-[#0b0b0e] hover:bg-white"
-          type="button"
+        <a
+          href="https://github.com/GithubAnant/toolss"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-[0.88rem] font-normal text-[#858585]"
         >
-          Get Started
-        </button>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" /></svg>
+          GitHub
+          {stars && (
+            <span className="text-[0.82rem] text-[#858585]">[{stars}]</span>
+          )}
+        </a>
       </div>
     </header>
   );
