@@ -12,7 +12,7 @@ export default function Home() {
 
       <Navbar />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-[1260px] flex-col px-6 pb-28 pt-24 md:px-10">
+      <main className="relative z-10 mx-auto flex w-full max-w-[1080px] flex-col px-4 pb-20 pt-16 md:px-6">
         <HeroSection />
         <HeroPreview />
         <TrustedBySection />
