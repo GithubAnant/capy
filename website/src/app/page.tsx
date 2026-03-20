@@ -4,6 +4,9 @@ import Navbar from "@/components/layout/Navbar";
 import HeroSection from "@/components/sections/HeroSection";
 import HeroPreview from "@/components/sections/HeroPreview";
 import UseCasesSection from "@/components/sections/UseCasesSection";
+import PricingSection from "@/components/sections/PricingSection";
+import FAQSection from "@/components/sections/FAQSection";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   return (
@@ -15,6 +18,9 @@ export default function Home() {
         <HeroSection />
         <HeroPreview />
         <UseCasesSection />
+        <PricingSection />
+        <FAQSection />
+        <Footer />
       </main>
     </div>
   );

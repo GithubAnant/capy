@@ -8,7 +8,7 @@ const useCases = [
     label: "Full-stack",
     title: "Full-stack development",
     description:
-      "Build frontend and backend seamlessly. Capy understands your entire stack—from React components to database queries—and helps you ship faster with context-aware suggestions.",
+      "Build frontend and backend seamlessly. Capy understands your entire stack, from React components to database queries, and helps you ship faster with context-aware suggestions.",
     image: "https://picsum.photos/id/1/1200/600",
   },
   {
@@ -40,9 +40,9 @@ export default function UseCasesSection() {
 
   return (
     <section className="pt-20">
-      <p className="mb-3 text-[0.78rem] text-[#66666d]">{"// Use cases"}</p>
-      <h2 className="font-display text-[1.6rem] font-medium leading-[1.1] text-[#F0F0F3] md:text-[2.4rem]">
-        One tool. <span className="text-[#66666d]">Every use case.</span>
+      <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Use cases"}</p>
+      <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
+        One tool. <span className="text-[#858585]">Every use case.</span>
       </h2>
 
       <div className="mt-5 inline-flex rounded-[1.1rem] bg-[#121214] p-1.5">
@@ -62,27 +62,22 @@ export default function UseCasesSection() {
         ))}
       </div>
 
-      {/* Image - all rendered, only active visible for instant switching */}
       <div className="relative mt-6 overflow-hidden rounded-[1.3rem] border border-white/10" style={{ aspectRatio: "2/1" }}>
-        {useCases.map((uc, i) => (
-          <Image
-            key={uc.label}
-            src={uc.image}
-            alt={uc.title}
-            fill
-            sizes="(max-width: 1080px) 100vw, 1080px"
-            className={`object-cover ${
-              i === active ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
+        <Image
+          key={current.label}
+          src={current.image}
+          alt={current.title}
+          fill
+          sizes="(max-width: 1080px) 100vw, 1080px"
+          className="object-cover"
+        />
       </div>
 
       {/* Description */}
       <div className="mt-6 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-[0.78rem] text-[#66666d]">{current.title}</p>
-          <p className="max-w-[48rem] text-[1.05rem] leading-[1.5] text-[#F0F0F3] md:text-[1.2rem]">
+          <p className="mb-2 text-[0.78rem] text-[#858585]">{current.title}</p>
+          <p className="max-w-[56rem] text-[0.95rem] leading-[1.5] text-[#F0F0F3] md:text-[1.05rem]">
             {current.description}
           </p>
         </div>

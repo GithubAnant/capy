@@ -1,4 +1,9 @@
-const navItems = ["Features", "Use cases", "Testimonials", "Pricing", "FAQ"];
+const navItems = [
+  { label: "Features", href: "#use-cases" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "Setup", href: "#setup" },
+  { label: "Docs", href: "#docs" },
+];
 
 export default function Navbar() {
   return (
@@ -11,11 +16,11 @@ export default function Navbar() {
         <nav className="hidden items-center gap-5 md:flex">
           {navItems.map((item) => (
             <a
-              key={item}
-              href="#"
+              key={item.label}
+              href={item.href}
               className="text-[0.88rem] font-normal text-[#858585] hover:text-[#F0F0F3]"
             >
-              {item}
+              {item.label}
             </a>
           ))}
         </nav>

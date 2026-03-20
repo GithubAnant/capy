@@ -1,0 +1,82 @@
+export default function PricingSection() {
+  const features = [
+    "Unlimited everything",
+    "AI autocomplete & chat",
+    "Full codebase context",
+    "Runs 100% locally",
+    "No telemetry or tracking",
+    "Community-driven development",
+  ];
+
+  return (
+    <section id="pricing" className="relative pb-20 pt-12">
+      <p className="mb-4 text-[0.78rem] text-[#858585]">{"// Pricing"}</p>
+      <h2 className="font-display text-[2.2rem] leading-[1.15] text-[#F0F0F3] md:text-[3.2rem]">
+        Free. Forever.
+      </h2>
+      <p className="mt-3 max-w-[28rem] text-[0.88rem] leading-[1.5] text-[#858585]">
+        No tiers. No upsells. Open source and locally hosted — your code never leaves your machine.
+      </p>
+
+      <div className="mt-10 grid max-w-[54rem] gap-4 md:grid-cols-2">
+        <div className="rounded-[1.3rem] border border-white/10 bg-[#18181c] px-7 py-7">
+          <p className="text-[0.85rem] font-medium text-[#858585]">Free</p>
+
+          <div className="mt-4 flex items-baseline gap-1">
+            <span className="font-display text-[3.2rem] leading-none text-[#F0F0F3]">$0</span>
+            <span className="text-[0.85rem] text-[#858585]">/month</span>
+          </div>
+
+          <p className="mt-3 text-[0.82rem] leading-[1.45] text-[#858585]">
+            Open source. Locally hosted. All features included, no strings attached.
+          </p>
+
+          <button
+            type="button"
+            className="mt-5 w-full rounded-full border border-white/30 bg-transparent py-2 text-[0.82rem] font-medium text-[#F0F0F3] hover:border-white hover:text-white"
+          >
+            Get started
+          </button>
+
+          <div className="mt-7 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-[0.75rem] text-[#858585]">Features</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+
+          <ul className="mt-5 space-y-3">
+            {features.map((f) => (
+              <li key={f} className="flex items-center gap-2.5 text-[0.82rem] text-[#858585]">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+                  <circle cx="8" cy="8" r="7.5" stroke="currentColor" strokeOpacity="0.4" />
+                  <path d="M5 8.5L7 10.5L11 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="rounded-[1.3rem] border border-white/10 bg-[#141418] px-7 py-7">
+          <p className="text-[0.78rem] text-[#858585]">Why free forever</p>
+          <h3 className="mt-2 font-display text-[1.6rem] leading-[1.15] text-[#F0F0F3]">All local. All free. All yours.</h3>
+
+          <div className="mt-5 space-y-3 text-[0.82rem] leading-[1.5] text-[#858585]">
+            <p>Runs on your machine. Your code and prompts stay local.</p>
+            <p>No subscriptions, no metered limits, no paywalls later.</p>
+            <p>Every feature is unlocked from day one.</p>
+          </div>
+
+          <div className="mt-7 rounded-[0.9rem] bg-black/35 px-4 py-4">
+            <p className="text-[0.74rem] uppercase tracking-[0.08em] text-[#858585]">Included</p>
+            <ul className="mt-3 space-y-2 text-[0.82rem] text-[#F0F0F3]">
+              <li>Unlimited projects</li>
+              <li>Unlimited prompts</li>
+              <li>Unlimited local usage</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
