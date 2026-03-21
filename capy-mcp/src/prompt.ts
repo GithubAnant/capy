@@ -1,14 +1,35 @@
-import type { CapyConfig, DesignSystem } from "./types.js";
+import type { CapyConfig, DesignSystem, FrameworkInfo } from "./types.js";
 
 export function generatePrompt(
   config: CapyConfig,
-  ds: DesignSystem
+  ds: DesignSystem,
+  context: {
+    framework: FrameworkInfo;
+    designSystemPath: string;
+    route: string;
+    previewStatus: "updated" | "unchanged" | "needs_confirmation";
+    missingExamples: string[];
+  }
 ): string {
   const lines: string[] = [];
 
   lines.push("# Design System Context");
   lines.push("");
   lines.push("You MUST use the following design system when writing UI code. Do not invent values.");
+  lines.push("");
+  lines.push("## Session Checklist");
+  lines.push(`1. Read \`${context.designSystemPath}\` before editing UI.`);
+  lines.push(`2. Inspect the local preview route at \`${context.route}\` when the framework supports it.`);
+  lines.push("3. If a preview specimen is missing data, update `.capy/examples.ts` instead of hardcoding production values.");
+  lines.push("4. After changing UI primitives or components, call `update` so the preview + JSON stay fresh.");
+  lines.push("");
+
+  lines.push("## Project Runtime");
+  lines.push(`Framework: ${context.framework.label}`);
+  lines.push(`Preview status: ${context.previewStatus}`);
+  if (context.framework.confirmationMessage) {
+    lines.push(context.framework.confirmationMessage);
+  }
   lines.push("");
 
   // Token format instruction
@@ -29,6 +50,16 @@ export function generatePrompt(
   };
   lines.push(`## Component Usage`);
   lines.push(strictMap[config.componentStrictness]);
+  lines.push("");
+
+  const styleMap = {
+    concise: "Respond with short, direct implementation notes.",
+    verbose: "Explain implementation decisions and tradeoffs clearly.",
+    strict: "Be strict about reusing tokens and existing components before introducing anything new.",
+    explorative: "Offer 1-2 well-reasoned UI options, but still stay inside the detected design system.",
+  };
+  lines.push("## Output Style");
+  lines.push(styleMap[config.outputStyle]);
   lines.push("");
 
   // Colors
@@ -88,6 +119,17 @@ export function generatePrompt(
     lines.push("## CSS Variables");
     for (const v of ds.cssVariables) {
       lines.push(`- \`${v.name}\`: ${v.value} (${v.file})`);
+    }
+    lines.push("");
+  }
+
+  if (context.missingExamples.length > 0) {
+    lines.push("## Components Waiting For Examples");
+    lines.push(
+      "These components need demo props or custom render wrappers in `.capy/examples.ts` before the preview can render them reliably:"
+    );
+    for (const name of context.missingExamples) {
+      lines.push(`- \`${name}\``);
     }
     lines.push("");
   }

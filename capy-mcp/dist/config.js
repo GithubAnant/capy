@@ -8,8 +8,11 @@ export function getDefaultConfig() {
         outputStyle: "concise",
         verbosity: "concise",
         previewPath: "./capy-preview.html",
+        previewRoute: "/preview",
+        previewLayout: "hybrid",
+        artifactsDir: ".capy",
         scanDirs: ["src"],
-        version: "1",
+        version: "2",
     };
 }
 export async function loadConfig(projectRoot) {

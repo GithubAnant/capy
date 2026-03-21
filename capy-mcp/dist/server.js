@@ -1,80 +1,72 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { loadConfig, writeConfig } from "./config.js";
-import { generatePreview } from "./preview.js";
-import { generatePrompt } from "./prompt.js";
-import { scan } from "./scanner/index.js";
-import { resolve } from "path";
+import { getDesignSystemContext, updateProjectArtifacts } from "./pipeline.js";
 const projectRoot = process.cwd();
 const server = new McpServer({
     name: "capy",
     version: "0.1.0",
 });
-server.tool("get_design_system", "Returns a structured JSON object of the project's design system (colors, typography, spacing, components, CSS variables) along with an instruction prompt for the AI agent. Call this before writing any UI code.", {}, async () => {
-    const config = await loadConfig(projectRoot);
-    const ds = await scan(projectRoot, config.scanDirs);
-    const prompt = generatePrompt(config, ds);
+server.tool("get_design_system", "Scans the project, writes .capy/design-system.json if needed, refreshes the local preview artifacts incrementally, and returns structured JSON plus a session prompt for the AI agent.", {}, async () => {
+    const context = await getDesignSystemContext(projectRoot);
     return {
         content: [
             {
                 type: "text",
-                text: JSON.stringify({ designSystem: ds, instructions: prompt }, null, 2),
+                text: JSON.stringify({
+                    designSystem: context.designSystem,
+                    designSystemArtifact: context.designSystemArtifact,
+                    preview: context.preview,
+                    instructions: context.prompt,
+                }, null, 2),
             },
         ],
     };
 });
-server.tool("generate_preview", "Scans the codebase and writes a self-contained HTML preview of the design system to disk. Open the file in a browser to visually audit colors, typography, spacing, and components.", {
-    outputPath: z
-        .string()
+server.tool("generate_preview", "Scans the codebase, writes or refreshes local preview artifacts, and generates a local-only /preview route when the framework supports it. Uses incremental writes by default.", {
+    forceRebuild: z
+        .boolean()
         .optional()
-        .describe("Path to write the HTML file (defaults to config previewPath)"),
-}, async ({ outputPath }) => {
-    const config = await loadConfig(projectRoot);
-    const ds = await scan(projectRoot, config.scanDirs);
-    const outPath = resolve(projectRoot, outputPath || config.previewPath);
-    await generatePreview(ds, outPath);
+        .describe("Rebuild preview artifacts even if incremental state says nothing changed."),
+}, async ({ forceRebuild }) => {
+    const result = await updateProjectArtifacts(projectRoot, {}, { forceRebuild });
     return {
         content: [
             {
                 type: "text",
-                text: `Preview written to ${outPath}. Open it in a browser to audit your design system.`,
+                text: JSON.stringify(result.preview, null, 2),
             },
         ],
     };
 });
-server.tool("update", "Updates capy.config.json with new preferences and regenerates the HTML preview page.", {
+server.tool("update", "Incrementally updates capy.config.json, .capy/design-system.json, and preview artifacts after design-system or preference changes.", {
     tokenFormat: z.enum(["tailwind", "css-vars", "raw"]).optional(),
     componentStrictness: z.enum(["existing-first", "scaffold", "both"]).optional(),
     outputStyle: z.enum(["concise", "verbose", "strict", "explorative"]).optional(),
     verbosity: z.enum(["concise", "verbose"]).optional(),
+    previewRoute: z.string().optional(),
+    previewLayout: z
+        .enum(["hybrid", "page-first", "feature-first", "component-library"])
+        .optional(),
+    artifactsDir: z.string().optional(),
     scanDirs: z.array(z.string()).optional(),
-    previewPath: z.string().optional(),
+    forceRebuild: z.boolean().optional(),
 }, async (updates) => {
-    const config = await loadConfig(projectRoot);
-    const newConfig = { ...config };
-    if (updates.tokenFormat)
-        newConfig.tokenFormat = updates.tokenFormat;
-    if (updates.componentStrictness)
-        newConfig.componentStrictness = updates.componentStrictness;
-    if (updates.outputStyle)
-        newConfig.outputStyle = updates.outputStyle;
-    if (updates.verbosity)
-        newConfig.verbosity = updates.verbosity;
-    if (updates.scanDirs)
-        newConfig.scanDirs = updates.scanDirs;
-    if (updates.previewPath)
-        newConfig.previewPath = updates.previewPath;
-    await writeConfig(projectRoot, newConfig);
-    // Regenerate preview
-    const ds = await scan(projectRoot, newConfig.scanDirs);
-    const outPath = resolve(projectRoot, newConfig.previewPath);
-    await generatePreview(ds, outPath);
+    const result = await updateProjectArtifacts(projectRoot, {
+        tokenFormat: updates.tokenFormat,
+        componentStrictness: updates.componentStrictness,
+        outputStyle: updates.outputStyle,
+        verbosity: updates.verbosity,
+        previewRoute: updates.previewRoute,
+        previewLayout: updates.previewLayout,
+        artifactsDir: updates.artifactsDir,
+        scanDirs: updates.scanDirs,
+    }, { forceRebuild: updates.forceRebuild });
     return {
         content: [
             {
                 type: "text",
-                text: `Config updated and preview regenerated at ${outPath}.`,
+                text: JSON.stringify(result, null, 2),
             },
         ],
     };

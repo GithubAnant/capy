@@ -3,10 +3,8 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { createInterface } from "readline/promises";
 import { stdin, stdout } from "process";
-import { resolve } from "path";
 import { getDefaultConfig, loadConfig, writeConfig } from "./config.js";
-import { scan } from "./scanner/index.js";
-import { generatePreview } from "./preview.js";
+import { getDesignSystemContext, updateProjectArtifacts } from "./pipeline.js";
 import type { CapyConfig } from "./types.js";
 
 const program = new Command();
@@ -25,6 +23,12 @@ program
     const componentStrictness = await ask(rl, "Component strictness", ["existing-first", "scaffold", "both"], "existing-first");
     const outputStyle = await ask(rl, "Output style", ["concise", "verbose", "strict", "explorative"], "concise");
     const verbosity = await ask(rl, "Verbosity", ["concise", "verbose"], "concise");
+    const previewLayout = await ask(
+      rl,
+      "Preview layout",
+      ["hybrid", "page-first", "feature-first", "component-library"],
+      "hybrid"
+    );
     const scanDirsRaw = await rl.question(chalk.cyan("Directories to scan (comma-separated) [src]: "));
     const scanDirs = scanDirsRaw.trim() ? scanDirsRaw.split(",").map((s) => s.trim()) : ["src"];
 
@@ -36,6 +40,7 @@ program
       componentStrictness: componentStrictness as CapyConfig["componentStrictness"],
       outputStyle: outputStyle as CapyConfig["outputStyle"],
       verbosity: verbosity as CapyConfig["verbosity"],
+      previewLayout: previewLayout as CapyConfig["previewLayout"],
       scanDirs,
     };
 
@@ -57,15 +62,12 @@ program
 
 program
   .command("preview")
-  .description("Generate an HTML preview of your design system")
-  .option("-o, --output <path>", "Output path for the HTML file")
+  .description("Generate or refresh the local preview route and Capy artifacts")
+  .option("--force", "Force-refresh preview artifacts even when nothing changed")
   .action(async (opts) => {
-    const projectRoot = process.cwd();
-    const config = await loadConfig(projectRoot);
-    const ds = await scan(projectRoot, config.scanDirs);
-    const outPath = resolve(projectRoot, opts.output || config.previewPath);
-    await generatePreview(ds, outPath);
-    console.log(chalk.green(`✓ Preview written to ${outPath}`));
+    const result = await updateProjectArtifacts(process.cwd(), {}, { forceRebuild: Boolean(opts.force) });
+    console.log(chalk.green(`✓ Preview status: ${result.preview.status}`));
+    console.log(chalk.gray(JSON.stringify(result.preview, null, 2)));
   });
 
 program
@@ -75,34 +77,42 @@ program
   .option("--strictness <level>", "Component strictness: existing-first, scaffold, both")
   .option("--output-style <style>", "Output style: concise, verbose, strict, explorative")
   .option("--verbosity <level>", "Verbosity: concise, verbose")
+  .option("--preview-layout <layout>", "Preview layout: hybrid, page-first, feature-first, component-library")
+  .option("--preview-route <route>", "Preview route path (default: /preview)")
+  .option("--artifacts-dir <path>", "Directory for Capy artifacts (default: .capy)")
   .option("--scan-dirs <dirs>", "Comma-separated scan directories")
+  .option("--force", "Force-refresh preview artifacts even when incremental state is unchanged")
   .action(async (opts) => {
-    const projectRoot = process.cwd();
-    const config = await loadConfig(projectRoot);
+    const result = await updateProjectArtifacts(
+      process.cwd(),
+      {
+        tokenFormat: opts.tokenFormat,
+        componentStrictness: opts.strictness,
+        outputStyle: opts.outputStyle,
+        verbosity: opts.verbosity,
+        previewLayout: opts.previewLayout,
+        previewRoute: opts.previewRoute,
+        artifactsDir: opts.artifactsDir,
+        scanDirs: opts.scanDirs ? opts.scanDirs.split(",").map((s: string) => s.trim()) : undefined,
+      },
+      { forceRebuild: Boolean(opts.force) }
+    );
 
-    if (opts.tokenFormat) config.tokenFormat = opts.tokenFormat;
-    if (opts.strictness) config.componentStrictness = opts.strictness;
-    if (opts.outputStyle) config.outputStyle = opts.outputStyle;
-    if (opts.verbosity) config.verbosity = opts.verbosity;
-    if (opts.scanDirs) config.scanDirs = opts.scanDirs.split(",").map((s: string) => s.trim());
-
-    await writeConfig(projectRoot, config);
-
-    const ds = await scan(projectRoot, config.scanDirs);
-    const outPath = resolve(projectRoot, config.previewPath);
-    await generatePreview(ds, outPath);
-
-    console.log(chalk.green("✓ Config updated and preview regenerated"));
+    console.log(chalk.green(`✓ Update status: ${result.status}`));
+    console.log(chalk.gray(JSON.stringify(result, null, 2)));
   });
 
 program
   .command("scan")
-  .description("Run the scanner and print the design system JSON")
+  .description("Run the scanner, refresh artifacts, and print the design-system context")
   .action(async () => {
-    const projectRoot = process.cwd();
-    const config = await loadConfig(projectRoot);
-    const ds = await scan(projectRoot, config.scanDirs);
-    console.log(JSON.stringify(ds, null, 2));
+    const context = await getDesignSystemContext(process.cwd());
+    console.log(JSON.stringify({
+      designSystem: context.designSystem,
+      designSystemArtifact: context.designSystemArtifact,
+      preview: context.preview,
+      instructions: context.prompt,
+    }, null, 2));
   });
 
 program.parse();
