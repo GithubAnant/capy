@@ -2,6 +2,43 @@
 
 import { useState, useRef, useEffect } from "react";
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className="shrink-0 cursor-pointer p-1 text-[#858585] transition-colors hover:text-[#F0F0F3]"
+      title="Copy"
+    >
+      {copied ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+function PlaceholderIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+      <rect width="16" height="16" rx="4" fill="#2a2a2a" />
+      <path d="M4.5 8h7M8 4.5v7" stroke="#858585" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const clients = [
   { name: "Claude Code", category: "agent" },
   { name: "Codex", category: "agent" },
@@ -81,9 +118,12 @@ function getConfig(client: Client) {
   };
 }
 
+const packageManagers = ["npm", "pnpm", "bun"] as const;
+
 export default function SetupSection() {
   const [selected, setSelected] = useState(clients[0]);
   const [open, setOpen] = useState(false);
+  const [pm, setPm] = useState<(typeof packageManagers)[number]>("npm");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -101,7 +141,7 @@ export default function SetupSection() {
   const steps = [
     {
       title: "Install Capy",
-      command: "npm install -g capy",
+      command: pm === "bun" ? "bun add -g capy" : `${pm} install -g capy`,
       description: "Install the Capy MCP server globally with a single command.",
     },
     {
@@ -126,13 +166,15 @@ export default function SetupSection() {
           </h2>
         </div>
 
-        {/* Client picker */}
-        <div ref={dropdownRef} className="relative">
+        <div className="flex items-center gap-3">
+          {/* Client picker */}
+          <div ref={dropdownRef} className="relative">
           <button
             type="button"
             onClick={() => setOpen(!open)}
             className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#171615] px-4 py-2.5 text-[0.85rem] font-medium text-[#F0F0F3] transition-colors hover:bg-white/10"
           >
+            <PlaceholderIcon />
             {selected.name}
             <svg
               className={`h-4 w-4 text-[#858585] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -158,13 +200,14 @@ export default function SetupSection() {
                       setSelected(client);
                       setOpen(false);
                     }}
-                    className={`flex w-full cursor-pointer items-center px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
+                    className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
                       selected.name === client.name ? "text-[#F0F0F3]" : "text-[#858585]"
                     }`}
                   >
+                    <PlaceholderIcon />
                     {client.name}
                     {selected.name === client.name && (
-                      <svg className="ml-auto h-4 w-4 text-[#C4B5FD]" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="ml-auto h-4 w-4 text-[#E8E0D6]" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -186,13 +229,14 @@ export default function SetupSection() {
                       setSelected(client);
                       setOpen(false);
                     }}
-                    className={`flex w-full cursor-pointer items-center px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
+                    className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
                       selected.name === client.name ? "text-[#F0F0F3]" : "text-[#858585]"
                     }`}
                   >
+                    <PlaceholderIcon />
                     {client.name}
                     {selected.name === client.name && (
-                      <svg className="ml-auto h-4 w-4 text-[#C4B5FD]" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="ml-auto h-4 w-4 text-[#E8E0D6]" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -200,29 +244,60 @@ export default function SetupSection() {
                 ))}
             </div>
           )}
+          </div>
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col gap-6 md:flex-row">
+      <div className="mt-10 flex flex-col gap-0">
         {steps.map((step, i) => (
-          <div
-            key={step.title}
-            className="flex flex-1 flex-col rounded-xl bg-[#171615] p-6"
-          >
-            <span className="mb-4 font-mono text-[0.75rem] font-medium text-[#858585]">
-              step {i + 1}.
-            </span>
-            <h3 className="mb-3 text-[1.05rem] font-medium text-[#F0F0F3]">
-              {step.title}
-            </h3>
-            <div className="mb-4 overflow-x-auto rounded-lg bg-black/50 px-4 py-3">
-              <pre className="text-[0.8rem] leading-relaxed text-[#C4B5FD]">
-                <code>{step.command}</code>
-              </pre>
+          <div key={step.title} className="flex gap-5">
+            {/* Left: step number + vertical line */}
+            <div className="flex flex-col items-center">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#171615] font-mono text-[0.75rem] font-medium text-[#F0F0F3]">
+                {i + 1}
+              </span>
+              {i < steps.length - 1 && (
+                <div className="w-px flex-1 bg-white/10" />
+              )}
             </div>
-            <p className="mt-auto text-[0.82rem] leading-[1.6] text-[#858585]">
-              {step.description}
-            </p>
+
+            {/* Right: content */}
+            <div className={`pb-10 ${i === steps.length - 1 ? "pb-0" : ""}`}>
+              <h3 className="mt-1 text-[1.05rem] font-medium text-[#F0F0F3]">
+                {step.title}
+              </h3>
+              <p className="mt-1.5 text-[0.82rem] leading-[1.6] text-[#858585]">
+                {step.description}
+              </p>
+              <div className="mt-3 overflow-hidden rounded-lg bg-[#171615]">
+                {i === 0 && (
+                  <div className="border-b border-white/5 px-4 py-2.5">
+                    <div className="inline-flex rounded-md bg-black/30 p-0.5">
+                      {packageManagers.map((p) => (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => setPm(p)}
+                          className={`cursor-pointer rounded-md px-2.5 py-1 font-mono text-[0.72rem] font-medium transition-colors ${
+                            pm === p ? "bg-white text-black" : "text-[#858585] hover:text-[#F0F0F3]"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="relative px-4 py-3">
+                  <pre className="overflow-x-auto text-[0.8rem] leading-relaxed text-[#E8E0D6]">
+                    <code>{step.command}</code>
+                  </pre>
+                  <div className="absolute right-3 top-3">
+                    <CopyButton text={step.command} />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

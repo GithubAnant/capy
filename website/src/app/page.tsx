@@ -15,7 +15,7 @@ export default function Home() {
 
       <Navbar />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col gap-16 px-4 pb-20 pt-16 md:px-6">
+      <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col gap-28 px-4 pb-20 pt-16 md:px-6">
         <HeroSection />
         <HeroPreview />
         <FeaturesSection />
