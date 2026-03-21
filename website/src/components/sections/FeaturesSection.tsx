@@ -39,7 +39,7 @@ export default function FeaturesSection() {
   const current = features[active];
 
   return (
-    <section>
+    <section id="features">
       <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Features"}</p>
       <h2 className="font-display text-[1.57rem] font-normal leading-[1.1] text-[#F0F0F3] md:text-[2.35rem]">
         One tool. <span className="text-[#858585]">Every feature.</span>

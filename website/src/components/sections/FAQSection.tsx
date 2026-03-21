@@ -6,32 +6,27 @@ const faqs = [
   {
     question: "Is Capy really free?",
     answer:
-      "Yes, Capy offers a generous free tier that includes core editing features and AI suggestions. Premium plans unlock advanced capabilities like team collaboration and priority support.",
-  },
-  {
-    question: "How does Capy compare to Cursor or GitHub Copilot?",
-    answer:
-      "Capy is built from the ground up as an AI-native editor, not a plugin on top of an existing editor. This means deeper integration, more accurate suggestions, and a smoother workflow across your entire codebase.",
+      "Yes, Capy is completely free. It includes all core tools and AI-powered coding assistance at no cost.",
   },
   {
     question: "Is my code private?",
     answer:
-      "Absolutely. Your code never leaves your machine unless you explicitly choose to use cloud features. We take privacy seriously and never train on your code.",
+      "Absolutely. Capy runs entirely on your local machine. Your code never leaves your device.",
+  },
+  // {
+  //   question: "What frameworks does Capy support?",
+  //   answer:
+  //     "Capy supports all major frameworks including React, Next.js, Vue, Svelte, Django, Flask, Express, FastAPI, and many more. Framework support is continuously expanding.",
+  // },
+  {
+    question: "Which AI assistants work with Capy?",
+    answer:
+      "Capy works with any AI assistant that supports the MCP protocol, including Claude Desktop, Claude Code, and other MCP-compatible clients. Just point your client to the local Capy server and you're ready to go.",
   },
   {
-    question: "What languages does Capy support?",
+    question: "How do I get started?",
     answer:
-      "Capy supports all major programming languages including TypeScript, JavaScript, Python, Rust, Go, Java, C++, and many more. Language support is continuously expanding.",
-  },
-  {
-    question: "Can I use Capy offline?",
-    answer:
-      "Yes. Core editing features work fully offline. AI-powered suggestions require an internet connection, but the editor itself is fully functional without one.",
-  },
-  {
-    question: "How do I migrate from my current editor?",
-    answer:
-      "Capy supports one-click import of settings, keybindings, and extensions from VS Code, Vim, and other popular editors. Most developers are up and running in under a minute.",
+      "Check out our docs at /docs or scroll up to the Setup section for a quick walkthrough. The whole setup takes under a minute.",
   },
 ];
 
