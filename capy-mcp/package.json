@@ -1,27 +1,55 @@
 {
   "name": "capy-mcp",
-  "version": "0.1.0",
-  "description": "Extract your design system and hand it to AI coding agents as structured context",
+  "version": "1.0.4",
+  "description": "MCP server that inspects a repo, returns a structured /preview brief, and writes a design-system JSON artifact for AI coding agents",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "capy": "./bin/cli.js"
+    "capy-mcp": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test"
   },
   "engines": {
     "node": ">=18"
   },
   "files": [
-    "dist",
-    "bin"
+    "dist"
   ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "nextjs",
+    "react",
+    "preview"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GithubAnant/capy.git",
+    "directory": "capy-mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/GithubAnant/capy/issues"
+  },
+  "homepage": "https://github.com/GithubAnant/capy/tree/main/capy-mcp",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "chalk": "^5.4.1",
-    "commander": "^13.1.0",
     "glob": "^11.0.1",
     "zod": "^3.24.2"
   },
