@@ -1,10 +1,4 @@
-import type { ArtifactWriteResult } from "./types.js";
 export declare function fileExists(path: string): Promise<boolean>;
-export declare function ensureDir(path: string): Promise<void>;
 export declare function readText(path: string): Promise<string | null>;
-export declare function writeTextIfChanged(path: string, nextContent: string): Promise<ArtifactWriteResult>;
-export declare function appendGitignorePatterns(projectRoot: string, patterns: string[]): Promise<ArtifactWriteResult>;
-export declare function hashContent(value: string): string;
-export declare function stableStringify(value: unknown): string;
+export declare function writeText(path: string, contents: string): Promise<void>;
 export declare function toPosixPath(path: string): string;
-export declare function relativeImportPath(fromDir: string, toFile: string): string;

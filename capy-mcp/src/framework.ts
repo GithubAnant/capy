@@ -28,12 +28,11 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "next-app-router",
       label: "Next.js App Router",
-      route: "/preview",
-      routeDir: join(srcAppDir, "preview"),
-      routeFile: join(srcAppDir, "preview/page.tsx"),
-      previewImportPrefix: "../../../",
-      needsConfirmation: false,
+      routingStyle: "app-router",
+      previewRoute: "/preview",
+      previewEntryFile: "src/app/preview/page.tsx",
       packageManager: detectPackageManager(packageJson?.packageManager),
+      needsConfirmation: false,
     };
   }
 
@@ -41,12 +40,11 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "next-app-router",
       label: "Next.js App Router",
-      route: "/preview",
-      routeDir: join(appDir, "preview"),
-      routeFile: join(appDir, "preview/page.tsx"),
-      previewImportPrefix: "../../",
-      needsConfirmation: false,
+      routingStyle: "app-router",
+      previewRoute: "/preview",
+      previewEntryFile: "app/preview/page.tsx",
       packageManager: detectPackageManager(packageJson?.packageManager),
+      needsConfirmation: false,
     };
   }
 
@@ -54,12 +52,11 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "next-pages-router",
       label: "Next.js Pages Router",
-      route: "/preview",
-      routeDir: join(srcPagesDir),
-      routeFile: join(srcPagesDir, "preview.tsx"),
-      previewImportPrefix: "../../",
-      needsConfirmation: false,
+      routingStyle: "pages-router",
+      previewRoute: "/preview",
+      previewEntryFile: "src/pages/preview.tsx",
       packageManager: detectPackageManager(packageJson?.packageManager),
+      needsConfirmation: false,
     };
   }
 
@@ -67,12 +64,11 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "next-pages-router",
       label: "Next.js Pages Router",
-      route: "/preview",
-      routeDir: join(pagesDir),
-      routeFile: join(pagesDir, "preview.tsx"),
-      previewImportPrefix: "../",
-      needsConfirmation: false,
+      routingStyle: "pages-router",
+      previewRoute: "/preview",
+      previewEntryFile: "pages/preview.tsx",
       packageManager: detectPackageManager(packageJson?.packageManager),
+      needsConfirmation: false,
     };
   }
 
@@ -80,9 +76,11 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "react-router",
       label: "React + React Router",
-      route: "/preview",
-      needsConfirmation: false,
+      routingStyle: "react-router",
+      previewRoute: "/preview",
+      previewEntryFile: "src/routes/preview.tsx",
       packageManager: detectPackageManager(packageJson?.packageManager),
+      needsConfirmation: false,
     };
   }
 
@@ -90,22 +88,26 @@ export async function detectFramework(projectRoot: string): Promise<FrameworkInf
     return {
       kind: "react-no-router",
       label: "React without router",
-      route: "/preview",
+      routingStyle: "none",
+      previewRoute: "/preview",
+      previewEntryFile: "src/routes/preview.tsx",
+      packageManager: detectPackageManager(packageJson?.packageManager),
       needsConfirmation: true,
       confirmationMessage:
-        "React Router is required to mount /preview. Confirm adding react-router-dom before generating the route.",
-      packageManager: detectPackageManager(packageJson?.packageManager),
+        "This repo looks like React without react-router-dom. The agent should confirm router setup before implementing /preview.",
     };
   }
 
   return {
     kind: "unknown",
     label: "Unknown framework",
-    route: "/preview",
+    routingStyle: "unknown",
+    previewRoute: "/preview",
+    previewEntryFile: "preview-entry-file-unknown",
+    packageManager: detectPackageManager(packageJson?.packageManager),
     needsConfirmation: true,
     confirmationMessage:
-      "Capy currently generates live /preview routes for Next.js and React projects. Framework detection failed for this repo.",
-    packageManager: detectPackageManager(packageJson?.packageManager),
+      "Framework detection was inconclusive. The agent should inspect routing manually before building /preview.",
   };
 }
 

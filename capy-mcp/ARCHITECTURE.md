@@ -1,121 +1,352 @@
 # Capy MCP — Architecture & Implementation Doc
 
-## What is Capy?
+## What it is now
 
-A locally-run MCP server + CLI that extracts your project's design system (colors, typography, spacing, components, CSS variables) and hands it to AI coding agents as structured context. No cloud, no API keys, no inference costs.
+Capy is now an **MCP-only repo inspection server**.
+
+It does **not** generate a preview page itself.
+It does **not** try to render components or parse every design token in the repo perfectly.
+
+Its job is smaller and cleaner:
+
+- detect the framework
+- map the likely UI/style/page structure of the repo
+- return a strict brief for the AI agent
+- write a durable design-system JSON artifact for later sessions
+- tell the agent how to inspect the repo before building `/preview`
+
+The AI agent does the heavy lifting.
+Capy gives the agent the map, the rules, and the target.
 
 ---
 
 ## Project Structure
 
-```
+```text
 capy-mcp/
-├── bin/cli.js                  # Entry shim → dist/cli.js
-├── package.json                # ESM, TypeScript, npm publishable
-├── tsconfig.json               # ES2022, NodeNext modules
+├── package.json                # Package metadata for the MCP server
+├── package-lock.json           # Exact dependency lockfile
+├── tsconfig.json               # TypeScript build config
 ├── src/
-│   ├── types.ts                # All shared TypeScript types
-│   ├── config.ts               # Read/write/default capy.config.json
-│   ├── scanner/
-│   │   ├── index.ts            # Orchestrator — runs all scanners in parallel
-│   │   ├── tailwind.ts         # Tailwind v3 config + v4 @theme extraction
-│   │   ├── css-vars.ts         # CSS custom property extraction
-│   │   └── components.ts       # Component file discovery (tsx/jsx/vue/svelte)
-│   ├── prompt.ts               # Generates markdown instruction prompt for agents
-│   ├── preview.ts              # Generates local preview route artifacts and canvas data
-│   ├── server.ts               # MCP server (stdio transport, 3 tools)
-│   └── cli.ts                  # CLI commands: init, preview, update, scan
-└── dist/                       # Compiled JS output
+│   ├── brief.ts                # Builds the structured /preview brief
+│   ├── design-system.ts        # Builds and writes the design-system JSON artifact
+│   ├── files.ts                # Small filesystem helpers
+│   ├── framework.ts            # Detects Next/React routing style and preview path
+│   ├── project.ts              # Shared project-facts discovery helpers
+│   ├── server.ts               # MCP server entrypoint and tool registration
+│   └── types.ts                # Shared TypeScript types
+├── test/
+│   ├── brief.test.mjs          # End-to-end tests for preview-brief output
+│   └── design-system.test.mjs  # End-to-end tests for design-system artifact output
+└── dist/                       # Built JS output shipped by the package
 ```
 
 ---
 
-## Key Files & What They Do
+## Runtime Model
 
-### `src/types.ts`
-Defines all shared types: `CapyConfig`, `DesignSystem`, `ColorToken`, `TypographyToken`, `SpacingToken`, `Component`, `CSSVariable`.
+The server exposes three tools:
 
-### `src/config.ts`
-- `getDefaultConfig()` — returns sensible defaults
-- `loadConfig(projectRoot)` — reads `capy.config.json`, merges with defaults
-- `writeConfig(projectRoot, config)` — writes config to disk
+- `get_preview_brief`
+- `update_preview`
+- `get_design_system`
 
-### `src/scanner/index.ts`
-Runs all three scanners in parallel via `Promise.all` and merges results into a single `DesignSystem` object.
+`get_preview_brief` takes a small input:
 
-### `src/scanner/tailwind.ts`
-- **Tailwind v3**: Finds `tailwind.config.{js,ts,mjs,cjs}`, dynamically imports it, extracts `theme.colors`, `theme.spacing`, `theme.fontFamily`, `theme.fontSize` (including `extend`)
-- **Tailwind v4**: Falls back to scanning CSS files for `@theme { ... }` blocks and extracting CSS variables from them
-- Flattens nested objects (e.g., `colors.blue.500` → `blue-500`)
+- whether the task is `build_preview` or `update_preview`
+- optional `changedFiles`
+- optional `userGoal`
 
-### `src/scanner/css-vars.ts`
-- Globs `*.css` files in configured `scanDirs` + project root
-- Regex extracts `--var-name: value;` declarations
-- Auto-categorizes variables as color/spacing/typography based on name and value patterns
-- Skips `@theme` blocks (handled by tailwind scanner)
+It returns structured output with:
 
-### `src/scanner/components.ts`
-- Globs `*.tsx`, `*.jsx`, `*.vue`, `*.svelte` in `scanDirs`
-- Filters out non-components (hooks, utils, types, test files)
-- Detects export type (default/named/unknown)
-- Checks for JSX presence to confirm it's actually a component
+- `project_facts`
+- `inspection_plan`
+- `constraints`
+- `deliverable_spec`
+- `update_strategy`
+- `warnings`
+- `instructions`
 
-### `src/prompt.ts`
-Takes `DesignSystem` + `CapyConfig` and generates a markdown instruction string that tells the agent:
-- Which token format to use (Tailwind classes / CSS vars / raw values)
-- Component strictness rules (use existing / scaffold new / both)
-- Enumerated colors, typography, spacing tokens
-- Full component list with file paths
+This is returned both as:
 
-### `src/preview.ts`
-Generates the local preview experience for supported frameworks.
+- `structuredContent` for machine-readable use
+- `content[0].text` as JSON text for host compatibility
 
-- Detects the framework and chooses a preview strategy
-- Builds `.capy/generated/*` modules for preview data and component registry
-- Creates a local-only `/preview` route for Next.js projects
-- Uses `.capy/examples.ts` for components that need demo props or wrappers
-- Keeps writes incremental so unchanged preview artifacts are not regenerated
+`get_design_system` writes `.capy/design-system.json` by default and returns:
+
+- artifact path
+- framework and preview facts
+- component and CSS-variable counts
+- source files
+- warnings
+- summary
+
+`update_preview` writes `.capy/preview-state.json` by default, diffs the repo against the last snapshot, refreshes `.capy/design-system.json`, and returns an incremental preview brief. This works even when the repo has no git history.
+
+---
+
+## File Tour
 
 ### `src/server.ts`
-MCP server using `@modelcontextprotocol/sdk` with stdio transport. Exposes 3 tools:
 
-| Tool | Purpose |
-|------|---------|
-| `get_design_system` | Refreshes `.capy/design-system.json`, updates preview artifacts, returns JSON + instruction prompt |
-| `generate_preview` | Refreshes the local `/preview` artifacts incrementally |
-| `update` | Updates config and incrementally refreshes design-system + preview artifacts |
+This is the MCP front door.
 
-### `src/cli.ts`
-CLI built with `commander`. Commands:
+It:
 
-| Command | What it does |
-|---------|-------------|
-| `capy init` | Interactive setup → writes `capy.config.json`, prints MCP config snippet |
-| `capy preview` | Refreshes the local preview route/artifacts |
-| `capy update` | Updates config via flags, then refreshes artifacts incrementally |
-| `capy scan` | Prints the full design-system context JSON to stdout |
+- creates the `McpServer`
+- registers `get_preview_brief`, `update_preview`, and `get_design_system`
+- calls `buildPreviewBrief(...)` for preview guidance
+- calls `runPreviewUpdate(...)` for snapshot-driven incremental updates
+- calls `writeDesignSystemArtifact(...)` for the persistent JSON artifact
+- returns results in MCP `structuredContent`
+
+Important note:
+the server now uses `registerTool(...)` instead of the older deprecated `tool(...)` helper.
+
+### `src/brief.ts`
+
+This is the core brain of the product.
+
+It builds the preview brief by:
+
+1. detecting the framework
+2. finding likely component directories
+3. finding likely page directories
+4. finding likely style files
+5. assembling the inspection steps
+6. assembling constraints and update strategy
+7. generating the final natural-language instruction string
+
+This file contains the main product logic now.
+
+### `src/design-system.ts`
+
+This file builds the durable `.capy/design-system.json` artifact.
+
+It:
+
+1. reuses framework and project-facts detection
+2. scans style files for CSS variables
+3. inventories likely components from the repo
+4. copies preview guidance into the artifact
+5. writes a stable JSON file for later sessions
+
+### `src/update.ts`
+
+This file handles incremental preview updates without depending on git.
+
+It:
+
+1. builds a hash snapshot of tracked UI files
+2. compares that snapshot with the prior `.capy/preview-state.json`
+3. finds changed, added, or removed files
+4. refreshes `.capy/design-system.json`
+5. returns an update-focused preview brief
+
+### `src/framework.ts`
+
+This file answers:
+
+- Is this Next App Router?
+- Next Pages Router?
+- React Router?
+- React with no router?
+- Unknown?
+
+It also decides the best preview target path, for example:
+
+- `src/app/preview/page.tsx`
+- `app/preview/page.tsx`
+- `src/pages/preview.tsx`
+- `src/routes/preview.tsx`
+
+It does not create those files.
+It only tells the agent where the preview should go.
+
+### `src/files.ts`
+
+This is a tiny helper file.
+
+It currently does four things:
+
+- check whether a file or directory exists
+- read a file safely
+- write a file safely after creating parent directories
+- normalize file paths to forward-slash format
+
+This file is intentionally small now.
+
+### `src/types.ts`
+
+This holds the shared shapes for:
+
+- framework detection
+- project facts
+- inspection steps
+- deliverable spec
+- final preview brief
+- design-system artifact
+
+If the server output changes, this file should be updated first.
+
+### `test/brief.test.mjs`
+
+This is the current safety net.
+
+It creates temporary fake repos and checks that:
+
+- Next App Router repos map to `src/app/preview/page.tsx`
+- React repos without routing raise the right warning
+- `update_preview` carries changed files into the update guidance
+
+These tests verify the product contract from the outside.
+
+### `test/design-system.test.mjs`
+
+This test file verifies that:
+
+- CSS variables are captured into the artifact
+- components are inventoried
+- `.capy/design-system.json` is written to disk
+
+### `test/update.test.mjs`
+
+This test file verifies that:
+
+- Capy creates a baseline snapshot when no prior state exists
+- later runs detect changed files without git
+- the design-system artifact is refreshed with the detected changed files
 
 ---
 
-## Dependencies
+## MCP Tool Contract
 
-| Package | Why |
-|---------|-----|
-| `@modelcontextprotocol/sdk` | MCP protocol server + stdio transport |
-| `commander` | CLI framework |
-| `chalk` | Terminal colors |
-| `glob` | File pattern matching |
-| `zod` | Schema validation (required by MCP SDK for tool inputs) |
+### Tool Name
+
+`get_preview_brief`
+
+### What it is for
+
+The agent should call this before writing or updating a `/preview` page.
+
+### Input
+
+```ts
+{
+  task: "build_preview" | "update_preview";
+  changedFiles?: string[];
+  userGoal?: string;
+}
+```
+
+### Tool Name
+
+`get_design_system`
+
+### What it is for
+
+The agent should call this when it needs a stable machine-readable UI artifact for future sessions or broader UI edits.
+
+### Input
+
+```ts
+{
+  artifactPath?: string;
+  mode?: "build" | "update";
+  changedFiles?: string[];
+  userGoal?: string;
+}
+```
+
+### Tool Name
+
+`update_preview`
+
+### What it is for
+
+The agent should call this after UI edits so Capy can detect incremental changes and tell the agent what parts of `/preview` need to be appended or refreshed.
+
+### Input
+
+```ts
+{
+  snapshotPath?: string;
+  designSystemPath?: string;
+  changedFiles?: string[];
+  userGoal?: string;
+}
+```
+
+### Output
+
+```ts
+{
+  project_facts: {
+    framework: "next-app-router" | "next-pages-router" | "react-router" | "react-no-router" | "unknown";
+    routing_style: "app-router" | "pages-router" | "react-router" | "none" | "unknown";
+    preview_route: string;
+    preview_entry_file: string;
+    package_manager: "npm" | "pnpm" | "yarn" | "bun";
+    likely_component_dirs: string[];
+    likely_style_files: string[];
+    likely_page_dirs: string[];
+    likely_ui_dirs: string[];
+  };
+  inspection_plan: Array<{
+    step: number;
+    action: string;
+    targets: string[];
+    reason: string;
+  }>;
+  constraints: string[];
+  deliverable_spec: {
+    goal: string;
+    layout: "bidirectional-scroll";
+    allow_horizontal_rows: boolean;
+    preview_route: string;
+    preview_entry_file: string;
+    sections: string[];
+    use_existing_components_first: boolean;
+    interaction_features: string[];
+  };
+  update_strategy: string[];
+  warnings: string[];
+  instructions: string;
+}
+```
 
 ---
 
-## How It Works End-to-End
+## How it works end-to-end
 
-1. User runs `capy init` → interactive prompts → `capy.config.json` written
-2. User adds MCP server to their agent config (`npx capy-mcp` via stdio)
-3. Agent calls `get_design_system` → scanner reads Tailwind config + CSS files + component files → returns structured JSON + instruction prompt
-4. Agent writes UI using actual design system values instead of inventing them
-5. User can run `capy preview` or have an agent call `generate_preview` to refresh the local `/preview` route and its supporting artifacts
+1. User asks an AI agent to build or update `/preview`, or refresh the design-system artifact.
+2. The agent discovers `get_preview_brief`, `update_preview`, and `get_design_system` via MCP.
+3. The agent calls one or both tools.
+4. Capy inspects the repo shallowly, diffs against its last snapshot when needed, and writes the JSON artifacts.
+5. The agent reads the listed files, `.capy/design-system.json`, or `.capy/preview-state.json`.
+6. The agent writes the actual `/preview` implementation inside the app.
+
+Capy does not generate the preview code itself.
+
+---
+
+## Why this architecture is better
+
+The earlier version tried to:
+
+- parse tokens deeply
+- infer component props
+- generate preview UI code
+- own rendering behavior
+
+That made the tool brittle and ugly.
+
+The new version is intentionally narrower:
+
+- deterministic repo facts from Capy
+- implementation intelligence from the AI agent
+
+This is a much better split of responsibilities.
 
 ---
 
@@ -126,243 +357,79 @@ Future updates should append new notes here instead of creating a separate doc.
 
 ### Big idea
 
-Imagine Capy is a very organized robot helper.
+Imagine Capy is a guide standing at the entrance of a huge building.
 
-- First, it walks around your project and writes down what colors, spacing, text sizes, and components it can find.
-- Then, it saves those notes in a neat JSON notebook.
-- Then, if your app is a Next.js app, it builds a local-only `/preview` room where you can walk around and inspect all the design pieces on a big scrollable canvas.
-- If some component is too complicated to show, Capy leaves a note saying "please give me fake demo props in `.capy/examples.ts`."
+It does not build the new room for you.
+It does not decorate the room either.
+
+Instead, it says:
+
+- "Here is the kind of building this is."
+- "Here are the rooms you should check first."
+- "Here is where the new preview room should go."
+- "Here are the rules you must follow while building it."
+
+That is what Capy does now.
 
 ### Top-level files
 
 #### `package.json`
-This is the lunchbox label for the project.
-It says the package name, the version, which commands exist (`build`, `test`), and which helper libraries Capy needs to do its work.
+
+This is the package label.
+It tells npm what the project is, how to build it, and which libraries it depends on.
 
 #### `package-lock.json`
-This is the exact grocery receipt.
-It remembers the precise dependency versions so installs stay repeatable.
+
+This is the dependency receipt.
+It locks exact package versions so installs stay stable.
 
 #### `tsconfig.json`
-This tells TypeScript how to think.
-It says where the source files live, where the built files should go, and how strict the type checking should be.
 
-#### `prd.md`
-This is the wish list.
-It explains what the product is supposed to become and why it exists.
-
-#### `ARCHITECTURE.md`
-This file.
-It explains how the machine is put together, and this new section is the long-term notebook for future maintainers.
-
-### `bin/`
-
-#### `bin/cli.js`
-This is the tiny front door for the terminal command.
-It just points Node to the built CLI code in `dist/`.
+This tells TypeScript how to compile the project.
 
 ### `src/`
 
-#### `src/types.ts`
-This is the box of labels.
-It defines the shapes of the important data:
+#### `src/server.ts`
 
-- config values
-- design-system tokens
-- component metadata
-- framework detection results
-- preview generation results
-- update results
+This is the receptionist.
+It waits for MCP clients, exposes the tool, and hands back the final structured result.
 
-When the rest of the code agrees on these labels, fewer bugs sneak in.
+#### `src/brief.ts`
 
-#### `src/config.ts`
-This is the settings drawer.
-It knows the default Capy settings and how to read or write `capy.config.json`.
-
-Important defaults now include:
-
-- preview route: `/preview`
-- preview layout mode
-- artifact folder: `.capy`
-
-#### `src/files.ts`
-This is the careful file helper.
-It does boring-but-important chores:
-
-- make folders
-- read files safely
-- write files only when content changed
-- append gitignore entries
-- make stable JSON strings
-- build relative import paths
-
-This file is a big reason Capy can be incremental instead of noisy.
+This is the planner.
+It looks at the repo and writes the smart checklist the AI agent should follow.
 
 #### `src/framework.ts`
+
 This is the "what kind of app is this?" detective.
-It looks at `package.json` and folders like `src/app` or `pages` and decides whether the project looks like:
+It figures out whether the project looks like Next.js or React and where `/preview` should probably live.
 
-- Next.js App Router
-- Next.js Pages Router
-- React with React Router
-- React without a router
-- unknown
+#### `src/files.ts`
 
-That answer decides whether Capy can build a live `/preview` route right away or must ask for confirmation first.
+This is the helper that does simple file chores.
+It checks if things exist, reads files, and cleans up path formatting.
 
-#### `src/artifacts.ts`
-This is the shelf manager for `.capy/`.
-It knows where Capy should place:
+#### `src/types.ts`
 
-- `.capy/design-system.json`
-- `.capy/examples.ts`
-- `.capy/state.json`
-- `.capy/generated/*`
-
-It also creates the starter `examples.ts` file the first time, but then leaves it alone because that file belongs to the user.
-
-#### `src/prompt.ts`
-This is the note Capy hands to the AI coding agent.
-It says things like:
-
-- which token style to use
-- whether to prefer existing components
-- where the design-system JSON lives
-- when to inspect `/preview`
-- which components still need example props
-
-So this file is less about "finding" things and more about "explaining the rules clearly."
-
-#### `src/pipeline.ts`
-This is the main conveyor belt.
-It stitches the whole workflow together.
-
-It has two big jobs:
-
-1. `getDesignSystemContext`
-   This scans the project, writes the JSON artifact if needed, refreshes preview artifacts, and builds the prompt.
-
-2. `updateProjectArtifacts`
-   This applies config updates, rescans the project, refreshes the JSON artifact, and refreshes preview files incrementally.
-
-If you want to understand the app at a high level, this is one of the best files to read.
-
-#### `src/preview.ts`
-This is the preview factory.
-It does the heavy lifting for the `/preview` experience.
-
-Its jobs are:
-
-- detect what preview strategy is possible for the current framework
-- build the preview data model
-- decide which components can auto-render
-- decide which ones need examples
-- generate the client preview page module
-- generate the component registry module
-- generate the actual route entry file for Next.js
-- save incremental state so the next run can avoid unnecessary rewrites
-
-The preview is now **not** a standalone HTML export anymore.
-Instead, for supported frameworks, Capy creates a local-only route and keeps the generated pieces in `.capy/generated/`.
-
-#### `src/server.ts`
-This is the MCP telephone operator.
-It exposes three tools over stdio:
-
-- `get_design_system`
-- `generate_preview`
-- `update`
-
-Each tool now returns structured JSON text instead of vague plain strings, so an AI agent can understand what happened more reliably.
-
-#### `src/cli.ts`
-This is the human-facing terminal remote control.
-It gives commands like:
-
-- `capy init`
-- `capy preview`
-- `capy update`
-- `capy scan`
-
-It now uses the same shared pipeline as the MCP server, which keeps behavior consistent.
-
-#### `src/scanner/index.ts`
-This is the team captain for scanning.
-It runs multiple scanners in parallel and merges their findings into one design-system object.
-
-#### `src/scanner/tailwind.ts`
-This is the Tailwind token hunter.
-It can read:
-
-- old-style `tailwind.config.*`
-- newer Tailwind v4 `@theme` CSS blocks
-
-It extracts colors, spacing, and typography tokens.
-
-#### `src/scanner/css-vars.ts`
-This is the CSS custom property hunter.
-It looks for things like `--color-primary` and sorts them into buckets like color, spacing, and typography when possible.
-
-#### `src/scanner/components.ts`
-This is the component hunter.
-It looks through component files and writes down:
-
-- component name
-- file path
-- export type
-- import name
-- whether the file is a client component
-- whether required props were detected
-
-It also ignores Capy's own generated preview files, so Capy does not accidentally scan itself and create a loop.
+This is the label maker.
+It defines the shapes of the important data so the rest of the code stays consistent.
 
 ### `test/`
 
-#### `test/pipeline.test.mjs`
-This is the safety teacher.
-It builds fake sample projects in temporary folders and checks that:
+#### `test/brief.test.mjs`
 
-- Next.js projects get preview artifacts
-- running update twice stays incremental
-- React projects without a router ask for confirmation
-
-These tests are important because they check behavior from the outside, like a real user would experience it.
+This is the practice arena.
+It creates fake apps and checks whether Capy gives sensible repo briefs.
 
 ### `dist/`
 
-The `dist/` folder is the robot's packed suitcase.
-It is generated output from TypeScript and should not be hand-edited.
+This is the packed suitcase.
+It is the built output that actually gets shipped by the package.
+Do not hand-edit it.
 
-Most files here are one-to-one built copies of files in `src/`:
+### Important reminder for future work
 
-- `dist/server.js` comes from `src/server.ts`
-- `dist/cli.js` comes from `src/cli.ts`
-- `dist/config.js` comes from `src/config.ts`
-- `dist/prompt.js` comes from `src/prompt.ts`
-- `dist/preview.js` comes from `src/preview.ts`
-- `dist/pipeline.js` comes from `src/pipeline.ts`
-- `dist/framework.js` comes from `src/framework.ts`
-- `dist/files.js` comes from `src/files.ts`
-- `dist/artifacts.js` comes from `src/artifacts.ts`
-- `dist/scanner/*` comes from `src/scanner/*`
-- `*.d.ts` files are type declaration copies so TypeScript users can understand the package
-
-### How the pieces talk to each other
-
-Here is the simple story:
-
-1. A human or AI calls the CLI or MCP tool.
-2. `pipeline.ts` loads config and runs the scanners.
-3. `artifacts.ts` writes the design-system JSON if it changed.
-4. `preview.ts` decides whether a live preview route can be generated.
-5. `files.ts` makes sure only changed files are rewritten.
-6. `prompt.ts` writes the little rulebook for the AI agent.
-7. `server.ts` or `cli.ts` returns the result back to whoever asked.
-
-### What to remember before changing code here
-
-- If you add a new long-lived artifact, explain it in this section.
-- If you add a new source file, append it here too.
-- If you change how preview generation works, update both the technical section above and this kid-level section.
-- Do not create a brand new documentation file for this purpose. Keep appending here.
+- If you add a new source file, append it to this doc.
+- If you change the MCP tool contract, update this doc.
+- Do not make a second technical doc for this package.
+- Keep appending here.
