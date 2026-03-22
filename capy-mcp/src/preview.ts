@@ -355,13 +355,66 @@ function componentId(component: PreviewRenderableComponent): string {
 }
 
 function buildPreviewDataModule(data: PreviewData): string {
-  return `export const previewData = ${stableStringify({
+  return `export interface PreviewToken {
+  name: string;
+  value: string;
+  source?: string;
+}
+
+export interface PreviewCssVariable {
+  name: string;
+  value: string;
+  file: string;
+}
+
+export interface PreviewComponentRecord {
+  id: string;
+  name: string;
+  filePath: string;
+  exportType: "default" | "named" | "unknown";
+  importName?: string;
+  requiredProps: string[];
+  renderMode: "auto" | "example" | "placeholder";
+  notes: string[];
+  exampleProps: Record<string, unknown>;
+}
+
+export interface PreviewBoardRecord {
+  id: string;
+  title: string;
+  kind: "foundations" | "components" | "components-meta";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  componentIds: string[];
+}
+
+export interface PreviewDataRecord {
+  meta: {
+    generatedAt: string;
+    framework: string;
+    route: string;
+    layout: string;
+    warnings: string[];
+  };
+  foundations: {
+    colors: PreviewToken[];
+    typography: PreviewToken[];
+    spacing: PreviewToken[];
+    cssVariables: PreviewCssVariable[];
+  };
+  components: PreviewComponentRecord[];
+  boards: PreviewBoardRecord[];
+}
+
+export const previewData: PreviewDataRecord = ${stableStringify({
     ...data,
     components: data.components.map((component) => ({
       ...component,
       id: componentId(component),
     })),
-  })} as const;\n`;
+  })};\n`;
 }
 
 function buildPreviewRegistryModule(
