@@ -40,7 +40,7 @@ export function ClientPicker({
         className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#171615] px-4 py-2.5 text-[0.85rem] font-medium text-[#F0F0F3] transition-colors hover:bg-white/10"
       >
         {selected.icon ? (
-          <img src={selected.icon} alt={selected.name} className="h-4 w-4 shrink-0" />
+          <img src={selected.icon} alt={selected.name} className={`${selected.iconClass ?? "h-4 w-4"} shrink-0`} />
         ) : (
           <PlaceholderIcon />
         )}
@@ -86,7 +86,7 @@ export function ClientPicker({
                     }`}
                   >
                     {client.icon ? (
-                      <img src={client.icon} alt={client.name} className="h-4 w-4 shrink-0" />
+                      <img src={client.icon} alt={client.name} className={`${client.iconClass ?? "h-4 w-4"} shrink-0`} />
                     ) : (
                       <PlaceholderIcon />
                     )}
