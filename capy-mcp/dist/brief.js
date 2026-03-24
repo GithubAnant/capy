@@ -47,23 +47,31 @@ export async function buildPreviewBrief(projectRoot, input) {
     };
 }
 function buildInspectionPlan(projectFacts, discoveryPlan) {
-    const appShellTargets = uniqueCompact([
-        firstMatching(projectFacts.likelyPageDirs, "src/app")
-            ? "src/app/layout.tsx"
-            : undefined,
-        firstMatching(projectFacts.likelyPageDirs, "src/app")
-            ? "src/app/page.tsx"
-            : undefined,
-        firstMatching(projectFacts.likelyPageDirs, "app") ? "app/layout.tsx" : undefined,
-        firstMatching(projectFacts.likelyPageDirs, "app") ? "app/page.tsx" : undefined,
-        firstMatching(projectFacts.likelyPageDirs, "src/pages") ? "src/pages/_app.tsx" : undefined,
-        firstMatching(projectFacts.likelyPageDirs, "pages") ? "pages/_app.tsx" : undefined,
-    ]);
+    // Build app shell targets dynamically from discovered page dirs
+    // Use routing style to suggest the right shell files
+    const appShellTargets = [];
+    for (const pageDir of projectFacts.likelyPageDirs) {
+        if (projectFacts.routingStyle === "app-router") {
+            appShellTargets.push(`${pageDir}/layout.tsx`);
+            appShellTargets.push(`${pageDir}/page.tsx`);
+        }
+        else if (projectFacts.routingStyle === "pages-router") {
+            appShellTargets.push(`${pageDir}/_app.tsx`);
+        }
+        else {
+            // Unknown or other routing — suggest both
+            appShellTargets.push(`${pageDir}/layout.tsx`);
+            appShellTargets.push(`${pageDir}/page.tsx`);
+            appShellTargets.push(`${pageDir}/_app.tsx`);
+        }
+    }
+    // Deduplicate
+    const uniqueShellTargets = Array.from(new Set(appShellTargets));
     return [
         {
             step: 1,
             action: "Read the app shell and routing entry points first",
-            targets: appShellTargets.length > 0 ? appShellTargets : projectFacts.likelyPageDirs,
+            targets: uniqueShellTargets.length > 0 ? uniqueShellTargets : projectFacts.likelyPageDirs,
             reason: "Understand the project structure, routing style, and baseline visual language.",
         },
         {
@@ -74,15 +82,17 @@ function buildInspectionPlan(projectFacts, discoveryPlan) {
         },
         {
             step: 3,
-            action: "Search for real UI primitives, overlays, and feedback patterns",
-            targets: discoveryPlan.searchStepTargets,
-            reason: "Capy's first pass is only a starting point. Search for real components and usage examples before building /preview.",
+            action: "Traverse discovered component directories",
+            targets: discoveryPlan.prioritizedFiles.length > 0
+                ? discoveryPlan.prioritizedFiles
+                : projectFacts.likelyComponentDirs,
+            reason: "Read the actual components discovered by Capy's scan. These are real files with PascalCase exports, not guesses.",
         },
         {
             step: 4,
-            action: "Inspect UI/component directories",
+            action: "Inspect UI/component directories for anything the scan missed",
             targets: projectFacts.likelyComponentDirs.length > 0 ? projectFacts.likelyComponentDirs : projectFacts.likelyUiDirs,
-            reason: "Find existing primitives, composites, and sections before inventing new preview-only UI.",
+            reason: "The automatic scan catches most components, but manually inspect directories for any non-standard patterns that were missed.",
         },
         {
             step: 5,
@@ -98,7 +108,7 @@ function buildConstraints(framework) {
         "Build a preview page that can support both vertical and horizontal scanning where useful.",
         "Use horizontal specimen rows only when they make scanning easier.",
         "Prefer existing components over creating preview-only components.",
-        "Do not stop after Capy's first-pass scan. Search the repo for real buttons, inputs, selects, tabs, cards, badges, dialogs, popovers, tooltips, dropdowns, toasts/snackbars, alerts, skeletons, and loading or empty states before marking a preview section complete.",
+        "Traverse all component directories found by Capy. Every file with a PascalCase export is a component candidate. Read real usage examples before marking a preview section complete.",
         "When you only find hooks, providers, or usage patterns, trace one real usage example and mirror that flow in /preview instead of inventing a fake component.",
         "If a component family is not present in the repo, label it as absent rather than fabricating a preview-only substitute.",
         "Keep the page neat, easy to scan, and aligned with the app's current design language.",
@@ -140,11 +150,5 @@ function buildInstructions(projectFacts, input, discoveryInstruction) {
         ? "Update the existing /preview route incrementally."
         : "Create the /preview route from scratch.";
     const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
-    return `${lead}${userGoal} Read the app shell first, then global styles, then search for real component families and usage examples, then inspect component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. ${discoveryInstruction}`;
-}
-function uniqueCompact(values) {
-    return Array.from(new Set(values.filter(Boolean)));
-}
-function firstMatching(values, needle) {
-    return values.find((value) => value === needle);
+    return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. ${discoveryInstruction}`;
 }

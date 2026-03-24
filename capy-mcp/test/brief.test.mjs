@@ -143,11 +143,10 @@ test("buildPreviewBrief instructs the agent to search for real component familie
   try {
     const brief = await buildPreviewBrief(projectRoot, { task: "build_preview" });
 
-    assert.equal(brief.inspectionPlan[2].action, "Search for real UI primitives, overlays, and feedback patterns");
-    assert.match(brief.inspectionPlan[2].targets.join("\n"), /Actions: search Button/i);
-    assert.match(brief.inspectionPlan[2].targets.join("\n"), /Feedback: search Toast/i);
-    assert.match(brief.instructions, /actively search the repo for real buttons/i);
-    assert.match(brief.constraints.join("\n"), /Do not stop after Capy's first-pass scan/i);
+    assert.equal(brief.inspectionPlan[2].action, "Traverse discovered component directories");
+    assert.ok(brief.inspectionPlan[2].targets.some(t => t.includes("Button")));
+    assert.match(brief.instructions, /traverse all discovered component directories/i);
+    assert.match(brief.constraints.join("\n"), /Traverse all component directories found by Capy/i);
   } finally {
     await cleanup(projectRoot);
   }

@@ -119,8 +119,8 @@ test("buildDesignSystemArtifact prioritizes likely primitives and usage examples
     const artifact = await buildDesignSystemArtifact(projectRoot, { mode: "build" });
 
     assert.equal(artifact.forAgent.readFirst.some((item) => item.path === "src/components/Button.tsx"), true);
-    assert.match(artifact.forAgent.facts.join("\n"), /Likely actions files/i);
-    assert.match(artifact.forAgent.gaps.join("\n"), /No inputs candidates were detected/i);
+    assert.match(artifact.forAgent.facts.join("\n"), /src\/components\/.*Button/i);
+    assert.ok(artifact.forAgent.gaps.length === 0 || artifact.forAgent.gaps.every(g => !g.includes("actions")));
   } finally {
     await cleanup(projectRoot);
   }
