@@ -1,6 +1,7 @@
 import { glob } from "glob";
 import { basename, join } from "path";
 import { buildPreviewBrief } from "./brief.js";
+import { buildComponentDiscoveryPlan } from "./component-discovery.js";
 import { readText, toPosixPath, writeText } from "./files.js";
 import { detectFramework } from "./framework.js";
 import { buildProjectFacts } from "./project.js";
@@ -8,6 +9,7 @@ const DEFAULT_ARTIFACT_PATH = ".capy/design-system.json";
 export async function buildDesignSystemArtifact(projectRoot, input = {}) {
     const framework = await detectFramework(projectRoot);
     const projectFacts = await buildProjectFacts(projectRoot, framework);
+    const discoveryPlan = await buildComponentDiscoveryPlan(projectRoot, projectFacts);
     const previewBrief = await buildPreviewBrief(projectRoot, {
         task: input.mode === "update" ? "update_preview" : "build_preview",
         changedFiles: input.changedFiles,
@@ -15,9 +17,9 @@ export async function buildDesignSystemArtifact(projectRoot, input = {}) {
     });
     const cssVariables = await collectCssVariables(projectRoot, projectFacts.likelyStyleFiles);
     const components = await collectComponents(projectRoot, projectFacts);
-    const readFirst = buildReadFirst(previewBrief, components);
+    const readFirst = buildReadFirst(previewBrief, components, discoveryPlan.prioritizedFiles);
     const bridges = await buildUsageBridges(projectRoot, projectFacts.likelyStyleFiles, components);
-    const gaps = buildGapNotes(projectFacts, components, cssVariables);
+    const gaps = buildGapNotes(projectFacts, components, cssVariables, discoveryPlan.missingFamilyGaps);
     const artifactPath = input.artifactPath ?? DEFAULT_ARTIFACT_PATH;
     return {
         forAgent: {
@@ -25,7 +27,7 @@ export async function buildDesignSystemArtifact(projectRoot, input = {}) {
                 ? "Update /preview incrementally. Read the files below first, then touch only the sections affected by the changed files unless shared foundations changed."
                 : "Build or refine /preview. Read the files below first, then mirror the repo's existing UI language instead of inventing a new one.",
             readFirst,
-            facts: buildAgentFacts(projectFacts, components, cssVariables),
+            facts: buildAgentFacts(projectFacts, components, cssVariables, discoveryPlan.discoveredFamilyFacts),
             bridges,
             gaps,
             updateHints: previewBrief.updateStrategy,
@@ -168,7 +170,7 @@ function classifyCssVariable(name) {
 function lineNumberAt(contents, index) {
     return contents.slice(0, index).split("\n").length;
 }
-function buildReadFirst(previewBrief, components) {
+function buildReadFirst(previewBrief, components, prioritizedFiles) {
     const seen = new Set();
     const readFirst = [];
     const firstComponentByDir = new Map();
@@ -181,8 +183,39 @@ function buildReadFirst(previewBrief, components) {
             firstComponentByDir.set(directory, component.path);
         }
     }
-    for (const step of previewBrief.inspectionPlan) {
+    for (const step of previewBrief.inspectionPlan.slice(0, 2)) {
         for (const target of step.targets) {
+            if (!looksLikeProjectPath(target))
+                continue;
+            const normalizedTarget = firstComponentByDir.get(target) ?? target;
+            if (seen.has(normalizedTarget))
+                continue;
+            seen.add(normalizedTarget);
+            readFirst.push({
+                path: normalizedTarget,
+                reason: step.reason,
+            });
+            if (readFirst.length >= 8) {
+                return readFirst;
+            }
+        }
+    }
+    for (const prioritizedFile of prioritizedFiles) {
+        if (seen.has(prioritizedFile))
+            continue;
+        seen.add(prioritizedFile);
+        readFirst.push({
+            path: prioritizedFile,
+            reason: "Likely reusable primitive or usage example. Read this before inventing preview-only specimens.",
+        });
+        if (readFirst.length >= 8) {
+            return readFirst;
+        }
+    }
+    for (const step of previewBrief.inspectionPlan.slice(2)) {
+        for (const target of step.targets) {
+            if (!looksLikeProjectPath(target))
+                continue;
             const normalizedTarget = firstComponentByDir.get(target) ?? target;
             if (seen.has(normalizedTarget))
                 continue;
@@ -198,16 +231,17 @@ function buildReadFirst(previewBrief, components) {
     }
     return readFirst;
 }
-function buildAgentFacts(projectFacts, components, cssVariables) {
+function buildAgentFacts(projectFacts, components, cssVariables, discoveredFamilyFacts) {
     return [
         `Use ${projectFacts.framework} conventions.`,
         `Implement /preview at ${projectFacts.previewEntryFile}.`,
         "Use repo-relative paths only.",
         `Found ${components.length} component candidates and ${cssVariables.length} CSS variables.`,
+        ...discoveredFamilyFacts,
     ];
 }
-function buildGapNotes(projectFacts, components, cssVariables) {
-    const gaps = [];
+function buildGapNotes(projectFacts, components, cssVariables, discoveryGaps) {
+    const gaps = [...discoveryGaps];
     if (components.length === 0) {
         gaps.push("No components were detected. Grep src/components, src/ui, src/features, components, ui, or features before assuming the app has no reusable UI.");
     }
@@ -260,4 +294,7 @@ function normalizeHex(hex) {
             .join("")}`;
     }
     return `#${normalized}`;
+}
+function looksLikeProjectPath(target) {
+    return target.includes("/") || /^[A-Za-z0-9._-]+\.(?:tsx|ts|jsx|js|css|scss|sass|less)$/.test(target);
 }

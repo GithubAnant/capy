@@ -118,3 +118,37 @@ test("buildPreviewBrief carries changed files into update guidance", async () =>
     await cleanup(projectRoot);
   }
 });
+
+test("buildPreviewBrief instructs the agent to search for real component families", async () => {
+  const projectRoot = await createTempProject({
+    "package.json": JSON.stringify(
+      {
+        name: "sample-next-app",
+        private: true,
+        dependencies: {
+          next: "16.0.0",
+          react: "19.0.0",
+        },
+      },
+      null,
+      2
+    ),
+    "src/app/layout.tsx": "export default function Layout({ children }) { return children; }",
+    "src/app/page.tsx": "export default function Page() { return null; }",
+    "src/app/globals.css": ":root { color: red; }",
+    "src/components/Button.tsx": "export function Button() { return null; }",
+    "src/lib/use-toast.ts": "export function useToast() { return { toast: () => null }; }",
+  });
+
+  try {
+    const brief = await buildPreviewBrief(projectRoot, { task: "build_preview" });
+
+    assert.equal(brief.inspectionPlan[2].action, "Search for real UI primitives, overlays, and feedback patterns");
+    assert.match(brief.inspectionPlan[2].targets.join("\n"), /Actions: search Button/i);
+    assert.match(brief.inspectionPlan[2].targets.join("\n"), /Feedback: search Toast/i);
+    assert.match(brief.instructions, /actively search the repo for real buttons/i);
+    assert.match(brief.constraints.join("\n"), /Do not stop after Capy's first-pass scan/i);
+  } finally {
+    await cleanup(projectRoot);
+  }
+});
