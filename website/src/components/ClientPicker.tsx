@@ -39,11 +39,13 @@ export function ClientPicker({
         onClick={() => setOpen(!open)}
         className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#171615] px-4 py-2.5 text-[0.85rem] font-medium text-[#F0F0F3] transition-colors hover:bg-white/10"
       >
-        {selected.icon ? (
-          <img src={selected.icon} alt={selected.name} className={`${selected.iconClass ?? "h-4 w-4"} shrink-0`} />
-        ) : (
-          <PlaceholderIcon />
-        )}
+        <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+          {selected.icon ? (
+            <img src={selected.icon} alt={selected.name} className={`${selected.iconClass ?? "h-4 w-4"} shrink-0`} />
+          ) : (
+            <PlaceholderIcon />
+          )}
+        </span>
         {selected.name}
         <svg
           className={`h-4 w-4 text-[#858585] transition-transform duration-200 ${
@@ -85,11 +87,13 @@ export function ClientPicker({
                       selected.name === client.name ? "text-[#F0F0F3]" : "text-[#858585]"
                     }`}
                   >
-                    {client.icon ? (
-                      <img src={client.icon} alt={client.name} className={`${client.iconClass ?? "h-4 w-4"} shrink-0`} />
-                    ) : (
-                      <PlaceholderIcon />
-                    )}
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                      {client.icon ? (
+                        <img src={client.icon} alt={client.name} className={`${client.iconClass ?? "h-4 w-4"} shrink-0`} />
+                      ) : (
+                        <PlaceholderIcon />
+                      )}
+                    </span>
                     {client.name}
                     {selected.name === client.name && (
                       <svg className="ml-auto h-4 w-4 text-[#E8E0D6]" viewBox="0 0 20 20" fill="currentColor">

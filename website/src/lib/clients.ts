@@ -8,7 +8,7 @@ export const clients = [
   { name: "Gemini CLI", category: "agent", icon: "/icons/gemini-cli.svg", iconClass: undefined },
   { name: "Mistral CLI", category: "agent", icon: "/icons/mistral-cli.svg", iconClass: undefined },
   { name: "OpenCode", category: "agent", icon: "/icons/opencode.svg", iconClass: undefined },
-  { name: "Kimi Code", category: "agent", icon: undefined, iconClass: undefined },
+  { name: "Kimi Code", category: "agent", icon: "/icons/kimi-code.svg", iconClass: undefined },
   { name: "QwenCode", category: "agent", icon: "/icons/qwen.svg", iconClass: undefined },
   { name: "VS Code", category: "ide", icon: "/icons/vscode.svg", iconClass: undefined },
   { name: "Cursor", category: "ide", icon: "/icons/cursor.svg", iconClass: undefined },
