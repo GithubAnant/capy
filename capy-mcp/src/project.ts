@@ -35,18 +35,19 @@ export async function buildProjectFacts(
 
   const normalized = sourceFiles.map((f) => toPosixPath(f));
 
-  // Scan files for PascalCase exports to find component directories
-  const componentDirs = await findComponentDirs(projectRoot, normalized);
-
-  // Find page/route directories by looking for routing markers
+  // Find page/route directories FIRST — we need these to exclude from component dirs
   const pageDirs = findPageDirs(normalized);
+
+  // Scan files for PascalCase exports to find component directories
+  // Exclude page dirs so route files don't inflate the component list
+  const componentDirs = await findComponentDirs(projectRoot, normalized, pageDirs);
 
   // Find style files — already dynamic via glob
   const styleFiles = await findStyleFiles(projectRoot);
 
-  // UI dirs = union of component + page dirs
+  // UI dirs = component dirs only (page dirs are routes, not reusable UI)
   const likelyUiDirs = Array.from(
-    new Set([...componentDirs, ...pageDirs.filter((dir) => !dir.endsWith("/preview"))])
+    new Set([...componentDirs])
   );
 
   return {
@@ -63,13 +64,18 @@ export async function buildProjectFacts(
 }
 
 /**
- * Find component directories by scanning source files for PascalCase exports.
- * A directory is a "component dir" if it contains ≥1 file with a PascalCase export.
- * We deduplicate to the shallowest ancestor that qualifies.
+ * Find component directories by scanning .tsx/.jsx source files for
+ * PascalCase exports that look like React components.
+ *
+ * Key rules:
+ * - Only .tsx/.jsx files qualify (plain .ts/.js are utilities, not components)
+ * - Files must contain JSX or React signals (not just any PascalCase export)
+ * - Page/route directories are excluded (those are routes, not reusable UI)
  */
 async function findComponentDirs(
   projectRoot: string,
-  sourceFiles: string[]
+  sourceFiles: string[],
+  pageDirs: string[]
 ): Promise<string[]> {
   const dirComponentCount = new Map<string, number>();
 
@@ -77,36 +83,32 @@ async function findComponentDirs(
     // Skip files at the root level (no directory)
     if (!file.includes("/")) continue;
 
-    const ext = file.split(".").pop() ?? "";
-    // Only check .tsx and .jsx files — those are almost always components
-    // Also check .ts/.js but require a PascalCase filename as extra signal
-    const isTsxJsx = ext === "tsx" || ext === "jsx";
-    const fileName = basename(file).replace(/\.[^.]+$/, "");
-    const isPascalFileName = /^[A-Z][a-zA-Z0-9]*$/.test(fileName);
+    // Skip files inside page/route dirs — those are routes, not components
+    const dir = dirname(file);
+    if (isInsidePageDir(dir, pageDirs)) continue;
 
-    if (!isTsxJsx && !isPascalFileName) continue;
+    const ext = file.split(".").pop() ?? "";
+    // ONLY check .tsx and .jsx files — plain .ts/.js are utilities/hooks/config
+    if (ext !== "tsx" && ext !== "jsx") continue;
+
+    // Skip common non-component page/route files by name
+    const fileName = basename(file).replace(/\.[^.]+$/, "");
+    if (isRouteFileName(fileName)) continue;
 
     const contents = await readText(`${projectRoot}/${file}`);
     if (!contents) continue;
 
+    // For .tsx/.jsx files, a PascalCase export is sufficient signal —
+    // the file extension itself indicates component intent
     if (hasPascalCaseExport(contents)) {
-      const dir = dirname(file);
       dirComponentCount.set(dir, (dirComponentCount.get(dir) ?? 0) + 1);
     }
   }
 
   if (dirComponentCount.size === 0) return [];
 
-  // Collect all dirs that have components
   const allDirs = Array.from(dirComponentCount.keys()).sort();
-
-  // Deduplicate: if both "src/components" and "src/components/sections" exist,
-  // keep the parent "src/components" (the child is already covered by glob patterns).
-  // But also keep the child if the parent has 0 direct components (e.g. parent is
-  // just an organizer directory).
-  const roots = deduplicateToRoots(allDirs);
-
-  return roots;
+  return deduplicateToRoots(allDirs);
 }
 
 /**
@@ -166,6 +168,40 @@ function findPageDirs(sourceFiles: string[]): string[] {
  */
 function hasPascalCaseExport(contents: string): boolean {
   return /export\s+(?:default\s+)?(?:function|const|class)\s+[A-Z][A-Za-z0-9_]*/.test(contents);
+}
+
+/**
+ * Check if a file looks like a React component (contains JSX or React imports).
+ * This prevents pure utility files with PascalCase class exports from being
+ * treated as components.
+ */
+function looksLikeComponent(contents: string): boolean {
+  // Contains JSX-like syntax: <Component, <div, <>, etc.
+  if (/<[A-Za-z][A-Za-z0-9.]*[\s/>]/.test(contents)) return true;
+  if (/<>/.test(contents)) return true;
+  // Imports React or uses React APIs
+  if (/from\s+['"]react['"]/.test(contents)) return true;
+  if (/React\.createElement/.test(contents)) return true;
+  return false;
+}
+
+/**
+ * Check if a directory is inside (or equal to) any of the known page dirs.
+ */
+function isInsidePageDir(dir: string, pageDirs: string[]): boolean {
+  return pageDirs.some((pageDir) => dir === pageDir || dir.startsWith(pageDir + "/"));
+}
+
+/**
+ * Common route/page filenames that should not be treated as components.
+ */
+function isRouteFileName(name: string): boolean {
+  const routeNames = new Set([
+    "layout", "page", "loading", "error", "not-found",
+    "template", "default", "route", "middleware",
+    "_app", "_document", "_error",
+  ]);
+  return routeNames.has(name);
 }
 
 async function findStyleFiles(projectRoot: string): Promise<string[]> {
