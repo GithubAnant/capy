@@ -9,7 +9,7 @@ export const clients = [
   { name: "Mistral CLI", category: "agent", icon: "/icons/mistral-cli.svg" },
   { name: "OpenCode", category: "agent", icon: "/icons/opencode.svg" },
   { name: "Kimi Code", category: "agent", icon: undefined },
-  { name: "QwenCode", category: "agent", icon: undefined },
+  { name: "QwenCode", category: "agent", icon: "/icons/qwen.svg" },
   { name: "VS Code", category: "ide", icon: undefined },
   { name: "Cursor", category: "ide", icon: "/icons/cursor.svg" },
   { name: "Antigravity", category: "ide", icon: "/icons/antigravity.svg" },
