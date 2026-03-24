@@ -1,0 +1,50 @@
+export function PricingFreeCard() {
+  const features = [
+    "Unlimited everything",
+    "Open-source",
+    "Full codebase context",
+    "Runs 100% locally",
+    "No telemetry or tracking",
+    "Community-driven development",
+  ];
+
+  return (
+    <div className="rounded-[1.3rem] bg-[#171615] px-7 py-7 md:px-8 md:py-8">
+      <p className="text-[0.85rem] font-medium text-[#858585]">Free</p>
+
+      <div className="mt-4 flex items-baseline gap-1">
+        <span className="font-display text-[3.2rem] leading-none text-[#F0F0F3]">$0</span>
+        <span className="text-[0.85rem] text-[#858585]">/lifetime</span>
+      </div>
+
+      <p className="mt-3 text-[0.82rem] leading-[1.45] text-[#858585]">
+        Open source. Locally hosted. All features included, no strings attached.
+      </p>
+
+      <button
+        type="button"
+        className="mt-5 w-full rounded-full border border-white/30 bg-transparent py-2 text-[0.82rem] font-medium text-[#F0F0F3] hover:border-white hover:text-white"
+      >
+        Get started
+      </button>
+
+      <div className="mt-7 flex items-center gap-3">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-[0.75rem] text-[#858585]">Features</span>
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+
+      <ul className="mt-5 space-y-3">
+        {features.map((f) => (
+          <li key={f} className="flex items-center gap-2.5 text-[0.82rem] text-[#858585]">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+              <circle cx="8" cy="8" r="7.5" stroke="currentColor" strokeOpacity="0.4" />
+              <path d="M5 8.5L7 10.5L11 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

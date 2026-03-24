@@ -30,30 +30,9 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function PlaceholderIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-      <rect width="16" height="16" rx="4" fill="#2a2a2a" />
-      <path d="M4.5 8h7M8 4.5v7" stroke="#858585" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
+import { ClientPicker } from "@/components/ClientPicker";
 
-const clients = [
-  { name: "Claude Code", category: "agent" },
-  { name: "Codex", category: "agent" },
-  { name: "OpenCode", category: "agent" },
-  { name: "Kimi Code", category: "agent" },
-  { name: "Gemini CLI", category: "agent" },
-  { name: "QwenCode", category: "agent" },
-  { name: "VS Code", category: "ide" },
-  { name: "Cursor", category: "ide" },
-  { name: "Antigravity", category: "ide" },
-  { name: "Zed", category: "ide" },
-  { name: "Windsurf", category: "ide" },
-];
-
-type Client = (typeof clients)[number];
+import { clients, type Client } from "@/lib/clients";
 
 function getConfig(client: Client) {
   const name = client.name;
@@ -121,20 +100,8 @@ function getConfig(client: Client) {
 const packageManagers = ["npm", "pnpm", "bun"] as const;
 
 export default function SetupSection() {
-  const [selected, setSelected] = useState(clients[0]);
-  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Client>(clients[0]);
   const [pm, setPm] = useState<(typeof packageManagers)[number]>("npm");
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   const config = getConfig(selected);
 
@@ -168,83 +135,7 @@ export default function SetupSection() {
 
         <div className="flex items-center gap-3">
           {/* Client picker */}
-          <div ref={dropdownRef} className="relative">
-          <button
-            type="button"
-            onClick={() => setOpen(!open)}
-            className="flex cursor-pointer items-center gap-2 rounded-lg bg-[#171615] px-4 py-2.5 text-[0.85rem] font-medium text-[#F0F0F3] transition-colors hover:bg-white/10"
-          >
-            <PlaceholderIcon />
-            {selected.name}
-            <svg
-              className={`h-4 w-4 text-[#858585] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-            </svg>
-          </button>
-
-          {open && (
-            <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl bg-[#1c1b1a] py-1 shadow-2xl ring-1 ring-white/10">
-              <p className="px-3 pb-1 pt-2 text-[0.7rem] font-medium uppercase tracking-wider text-[#585858]">
-                Agents
-              </p>
-              {clients
-                .filter((c) => c.category === "agent")
-                .map((client) => (
-                  <button
-                    key={client.name}
-                    type="button"
-                    onClick={() => {
-                      setSelected(client);
-                      setOpen(false);
-                    }}
-                    className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
-                      selected.name === client.name ? "text-[#F0F0F3]" : "text-[#858585]"
-                    }`}
-                  >
-                    <PlaceholderIcon />
-                    {client.name}
-                    {selected.name === client.name && (
-                      <svg className="ml-auto h-4 w-4 text-[#E8E0D6]" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-
-              <div className="mx-3 my-1 border-t border-white/5" />
-
-              <p className="px-3 pb-1 pt-2 text-[0.7rem] font-medium uppercase tracking-wider text-[#585858]">
-                IDEs
-              </p>
-              {clients
-                .filter((c) => c.category === "ide")
-                .map((client) => (
-                  <button
-                    key={client.name}
-                    type="button"
-                    onClick={() => {
-                      setSelected(client);
-                      setOpen(false);
-                    }}
-                    className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-[0.85rem] transition-colors hover:bg-white/5 ${
-                      selected.name === client.name ? "text-[#F0F0F3]" : "text-[#858585]"
-                    }`}
-                  >
-                    <PlaceholderIcon />
-                    {client.name}
-                    {selected.name === client.name && (
-                      <svg className="ml-auto h-4 w-4 text-[#E8E0D6]" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </button>
-                ))}
-            </div>
-          )}
-          </div>
+          <ClientPicker selected={selected} onSelect={setSelected} />
         </div>
       </div>
 
