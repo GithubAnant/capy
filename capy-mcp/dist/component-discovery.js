@@ -36,14 +36,12 @@ async function scanForComponents(projectRoot, projectFacts) {
         ...projectFacts.likelyComponentDirs,
         ...projectFacts.likelyUiDirs,
     ]);
-    let patterns;
-    if (searchDirs.size > 0) {
-        patterns = Array.from(searchDirs).map((dir) => `${dir}/**/*.{ts,tsx,js,jsx}`);
+    // If no component dirs were discovered, return empty instead of
+    // falling back to a repo-wide scan that reads every file's contents.
+    if (searchDirs.size === 0) {
+        return [];
     }
-    else {
-        // Fallback: scan everything if no dirs were discovered
-        patterns = ["**/*.{ts,tsx,js,jsx}"];
-    }
+    const patterns = Array.from(searchDirs).map((dir) => `${dir}/**/*.{ts,tsx,js,jsx}`);
     const sourceFiles = await glob(patterns, {
         cwd: projectRoot,
         nodir: true,
@@ -72,7 +70,6 @@ async function scanForComponents(projectRoot, projectFacts) {
                 path: file,
                 basename: basename(file).replace(/\.[^.]+$/, ""),
                 exports,
-                contents,
             });
         }
     }

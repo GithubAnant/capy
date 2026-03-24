@@ -3,7 +3,6 @@ interface DiscoveredComponent {
     path: string;
     basename: string;
     exports: string[];
-    contents: string;
 }
 export interface ComponentDiscoveryPlan {
     allDiscoveredComponents: DiscoveredComponent[];

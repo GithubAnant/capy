@@ -7,7 +7,6 @@ interface DiscoveredComponent {
   path: string;
   basename: string;
   exports: string[];
-  contents: string;
 }
 
 export interface ComponentDiscoveryPlan {
@@ -64,13 +63,13 @@ async function scanForComponents(
     ...projectFacts.likelyUiDirs,
   ]);
 
-  let patterns: string[];
-  if (searchDirs.size > 0) {
-    patterns = Array.from(searchDirs).map((dir) => `${dir}/**/*.{ts,tsx,js,jsx}`);
-  } else {
-    // Fallback: scan everything if no dirs were discovered
-    patterns = ["**/*.{ts,tsx,js,jsx}"];
+  // If no component dirs were discovered, return empty instead of
+  // falling back to a repo-wide scan that reads every file's contents.
+  if (searchDirs.size === 0) {
+    return [];
   }
+
+  const patterns = Array.from(searchDirs).map((dir) => `${dir}/**/*.{ts,tsx,js,jsx}`);
 
   const sourceFiles = await glob(patterns, {
     cwd: projectRoot,
@@ -103,7 +102,6 @@ async function scanForComponents(
         path: file,
         basename: basename(file).replace(/\.[^.]+$/, ""),
         exports,
-        contents,
       });
     }
   }
