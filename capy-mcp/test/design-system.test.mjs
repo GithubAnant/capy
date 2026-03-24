@@ -93,3 +93,35 @@ test("writeDesignSystemArtifact writes a stable json file to .capy", async () =>
     await cleanup(projectRoot);
   }
 });
+
+test("buildDesignSystemArtifact prioritizes likely primitives and usage examples", async () => {
+  const projectRoot = await createTempProject({
+    "package.json": JSON.stringify(
+      {
+        name: "sample-next-app",
+        private: true,
+        dependencies: {
+          next: "16.0.0",
+          react: "19.0.0",
+        },
+      },
+      null,
+      2
+    ),
+    "src/app/layout.tsx": "export default function Layout({ children }) { return children; }",
+    "src/app/page.tsx": "export default function Page() { return null; }",
+    "src/app/globals.css": ":root { --color-primary: #111827; }",
+    "src/components/Button.tsx": "export function Button() { return null; }",
+    "src/lib/use-toast.ts": "export function useToast() { return { toast: () => null }; }",
+  });
+
+  try {
+    const artifact = await buildDesignSystemArtifact(projectRoot, { mode: "build" });
+
+    assert.equal(artifact.forAgent.readFirst.some((item) => item.path === "src/components/Button.tsx"), true);
+    assert.match(artifact.forAgent.facts.join("\n"), /Likely actions files/i);
+    assert.match(artifact.forAgent.gaps.join("\n"), /No inputs candidates were detected/i);
+  } finally {
+    await cleanup(projectRoot);
+  }
+});
