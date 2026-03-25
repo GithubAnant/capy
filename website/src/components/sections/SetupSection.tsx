@@ -80,7 +80,7 @@ export default function SetupSection() {
   const steps = [
     {
       title: "Install Capy",
-      command: pm === "bun" ? "bun add -g capy" : `${pm} install -g capy`,
+      command: pm === "bun" ? "bun add -g capy-mcp@latest" : `${pm} install -g capy-mcp@latest`,
       description: "Install the Capy MCP server globally with a single command.",
     },
     {

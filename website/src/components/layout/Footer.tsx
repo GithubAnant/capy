@@ -1,13 +1,24 @@
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Setup", href: "/#setup" },
-  { label: "Docs", href: "/docs" },
+  { label: "Features", href: "features" },
+  { label: "Pricing", href: "pricing" },
+  { label: "Setup", href: "setup" },
+  { label: "Docs", href: "/docs", isRoute: true },
+  { label: "Privacy", href: "/privacy", isRoute: true },
 ];
 
+function scrollTo(id: string) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth" });
+    history.replaceState(null, "", window.location.pathname);
+  }
+}
+
 export default function Footer() {
+  const router = useRouter();
   return (
     <footer className="rounded-[1.3rem] bg-[#171615] px-10 pb-10 pt-12 md:px-14">
       <div className="flex flex-col justify-between gap-12 md:flex-row">
@@ -51,13 +62,27 @@ export default function Footer() {
 
         {/* Right — nav */}
         <div className="md:mr-[10%]">
-          <p className="text-[0.85rem] font-medium text-[#F0F0F3]">Navigation</p>
+          <p className="text-[0.85rem] font-medium underline text-[#F0F0F3]">Navigation</p>
           <ul className="mt-4 space-y-3">
             {navLinks.map((link) => (
               <li key={link.label}>
-                <a href={link.href} className="text-[0.82rem] text-[#858585] transition-colors hover:text-[#F0F0F3]">
-                  {link.label}
-                </a>
+                {"isRoute" in link ? (
+                  <button
+                    type="button"
+                    onClick={() => router.push(link.href)}
+                    className="cursor-pointer text-[0.82rem] text-[#858585] transition-colors hover:text-[#F0F0F3]"
+                  >
+                    {link.label}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => scrollTo(link.href)}
+                    className="cursor-pointer text-[0.82rem] text-[#858585] transition-colors hover:text-[#F0F0F3]"
+                  >
+                    {link.label}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
