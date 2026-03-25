@@ -263,7 +263,8 @@ export function createServer(projectRoot = process.cwd()) {
     return server;
 }
 export async function main() {
-    const server = createServer();
+    const projectRoot = process.argv[2] || process.cwd();
+    const server = createServer(projectRoot);
     const transport = new StdioServerTransport();
     await server.connect(transport);
 }
