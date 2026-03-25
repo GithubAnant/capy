@@ -30,6 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${interDisplay.variable} ${geistMono.variable} h-full antialiased`}>
+      <head>
+        <script
+          src="https://cdn.databuddy.cc/databuddy.js"
+          data-client-id="8ad3841f-8f63-4fea-96c4-fde9ee8c223c"
+          crossOrigin="anonymous"
+          async
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <SmoothScroll />
         {children}
