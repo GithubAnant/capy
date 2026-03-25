@@ -1,12 +1,11 @@
 export const clients = [
   { name: "Claude Code", category: "agent", icon: "/icons/claude-code.svg", iconClass: undefined },
   { name: "Claude Desktop", category: "agent", icon: "/icons/claude.svg", iconClass: undefined },
-  { name: "Cline", category: "agent", icon: "/icons/cline.svg", iconClass: undefined },
   { name: "Codex", category: "agent", icon: "/icons/codex.svg", iconClass: undefined },
   { name: "Conductor", category: "agent", icon: "/icons/conductor.svg", iconClass: "h-5 w-5" },
   { name: "Copilot CLI", category: "agent", icon: "/icons/copilot-cli.svg", iconClass: undefined },
   { name: "Gemini CLI", category: "agent", icon: "/icons/gemini-cli.svg", iconClass: undefined },
-  { name: "Mistral CLI", category: "agent", icon: "/icons/mistral-cli.svg", iconClass: undefined },
+  { name: "Mistral Vibe", category: "agent", icon: "/icons/mistral-cli.svg", iconClass: undefined },
   { name: "OpenCode", category: "agent", icon: "/icons/opencode.svg", iconClass: undefined },
   { name: "Kimi Code", category: "agent", icon: "/icons/kimi-code.svg", iconClass: undefined },
   { name: "QwenCode", category: "agent", icon: "/icons/qwen.svg", iconClass: undefined },

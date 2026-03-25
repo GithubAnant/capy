@@ -5,93 +5,42 @@ import { CopyButton } from "@/components/CopyButton";
 import { ClientPicker } from "@/components/ClientPicker";
 
 import { clients, type Client } from "@/lib/clients";
+import { getClientConfig } from "@/lib/client-configs";
 
 function getConfig(client: Client) {
-  const name = client.name;
-
-  if (name === "Claude Code") {
+  const config = getClientConfig(client.name);
+  if (config) {
+    const defaultPath = config.configPaths["all"] || config.configPaths["macOS"] || "settings.json";
     return {
-      file: ".claude/settings.json",
-      code: `{
-  "mcpServers": {
-    "capy": {
-      "command": "capy-mcp",
-      "args": ["start"]
-    }
-  }
-}`,
+      file: defaultPath,
+      code: config.snippet
     };
   }
-
-  if (name === "VS Code" || name === "Cursor" || name === "Windsurf") {
-    return {
-      file: ".vscode/settings.json",
-      code: `{
-  "mcp": {
-    "servers": {
-      "capy": {
-        "command": "capy-mcp",
-        "args": ["start"]
-      }
-    }
-  }
-}`,
-    };
-  }
-
-  if (name === "Zed") {
-    return {
-      file: "settings.json",
-      code: `{
-  "context_servers": {
-    "capy": {
-      "command": {
-        "path": "capy-mcp",
-        "args": ["start"]
-      }
-    }
-  }
-}`,
-    };
-  }
-
+  
   // Default MCP config for other clients
   return {
     file: "mcp_config.json",
     code: `{
   "mcpServers": {
     "capy": {
-      "command": "capy-mcp",
-      "args": ["start"]
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"]
     }
   }
 }`,
   };
 }
 
-const packageManagers = ["npm", "pnpm", "bun"] as const;
-
 export default function SetupSection() {
   const [selected, setSelected] = useState<Client>(clients[0]);
-  const [pm, setPm] = useState<(typeof packageManagers)[number]>("npm");
 
   const config = getConfig(selected);
 
   const steps = [
     {
-      title: "Install Capy",
-      command: pm === "bun" ? "bun add -g capy-mcp@latest" : `${pm} install -g capy-mcp@latest`,
-      description: "Install the Capy MCP server globally with a single command.",
-    },
-    {
-      title: "Start the server",
-      command: "capy-mcp start",
-      description: "Launch the local MCP server. It runs in the background and listens for connections.",
-    },
-    {
-      title: "Connect your client",
+      title: "Configure " + selected.name,
       command: `// ${config.file}\n${config.code}`,
-      description: `Add the MCP config to ${selected.name} and start coding.`,
+      description: `Add the MCP config to ${selected.name}. Capy runs locally via npx — no global install needed.`,
     },
   ];
 
@@ -133,24 +82,6 @@ export default function SetupSection() {
                 {step.description}
               </p>
               <div className="mt-3 overflow-hidden rounded-lg bg-[#171615]">
-                {i === 0 && (
-                  <div className="border-b border-white/5 px-4 py-2.5">
-                    <div className="inline-flex rounded-md bg-black/30 p-0.5">
-                      {packageManagers.map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setPm(p)}
-                          className={`cursor-pointer rounded-md px-2.5 py-1 font-mono text-[0.72rem] font-medium transition-colors ${
-                            pm === p ? "bg-white text-black" : "text-[#858585] hover:text-[#F0F0F3]"
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
                 <div className="relative px-4 py-3">
                   <pre className="overflow-x-auto text-[0.8rem] leading-relaxed text-[#E8E0D6]">
                     <code>{step.command}</code>

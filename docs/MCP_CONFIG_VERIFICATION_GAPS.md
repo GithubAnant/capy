@@ -16,8 +16,6 @@ This file lists clients/providers that were not included in `/docs` MCP snippets
   - Gap: Could not find authoritative public docs that clearly define global MCP config path and schema.
 - Antigravity
   - Gap: Could not find authoritative public docs that clearly define global MCP config path and schema.
-- Cline
-  - Gap: Cline is typically configured through the VS Code extension UI/workspace flow; a stable, documented global file path/schema suitable for this page was not confirmed in this verification pass.
 - Claude Desktop
   - Gap: Claude Desktop per-platform config paths can differ by distribution/version; this pass prioritized Claude Code and did not complete a full current path-matrix verification suitable for a strict "pinpoint accurate" global section.
 

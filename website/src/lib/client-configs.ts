@@ -19,22 +19,11 @@ export interface ClientConfig {
 /*  Shared snippet fragments                                          */
 /* ------------------------------------------------------------------ */
 
-const stdJson = `{
+const stdioViaNpxJson = `{
   "mcpServers": {
     "capy": {
-      "command": "capy",
-      "args": ["start"]
-    }
-  }
-}`;
-
-const vscodeJson = `{
-  "mcp": {
-    "servers": {
-      "capy": {
-        "command": "capy",
-        "args": ["start"]
-      }
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"]
     }
   }
 }`;
@@ -44,133 +33,152 @@ const vscodeJson = `{
 /* ------------------------------------------------------------------ */
 
 export const clientConfigs: ClientConfig[] = [
-  /* ---- Agents ---------------------------------------------------- */
-  {
-    name: "Claude Code",
-    cli: "claude mcp add capy -- capy start",
-    configPaths: {
-      all: "~/.claude/settings.json",
-    },
-    snippet: stdJson,
-    format: "json",
-  },
+  /* ---- Verified agents ------------------------------------------- */
   {
     name: "Claude Desktop",
     configPaths: {
       macOS: "~/Library/Application Support/Claude/claude_desktop_config.json",
-      Windows: "%APPDATA%\\Claude\\claude_desktop_config.json",
+      Windows: "%APPDATA%\\\\Claude\\\\claude_desktop_config.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
-    note: "Restart Claude Desktop after editing the config file.",
   },
   {
-    name: "Cline",
+    name: "Claude Code",
+    cli: "claude mcp add capy -- npx -y capy-mcp@latest",
     configPaths: {
-      all: "Configured via the Cline extension UI in VS Code.",
+      all: "~/.claude/mcp.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
-    note: "Open the Cline sidebar → MCP Servers → Add Server, then paste the config.",
+    note: "For project-shared MCP config, Claude Code uses .mcp.json in the repo root.",
   },
   {
     name: "Codex",
-    cli: "codex --mcp-config mcp.json",
+    cli: "codex mcp add capy -- npx -y capy-mcp@latest",
     configPaths: {
-      all: "~/.codex/mcp.json",
+      all: "~/.codex/config.toml",
     },
-    snippet: stdJson,
-    format: "json",
+    snippet: `[mcp_servers.capy]
+command = "npx"
+args = ["-y", "capy-mcp@latest"]`,
+    format: "toml",
+  },
+  {
+    name: "Mistral Vibe",
+    configPaths: {
+      all: "~/.vibe/config.toml",
+    },
+    snippet: `[[mcp_servers]]
+name = "capy"
+transport = "stdio"
+command = "npx"
+args = ["-y", "capy-mcp@latest"]`,
+    format: "toml",
   },
   {
     name: "Copilot CLI",
     configPaths: {
-      all: "~/.github-copilot/mcp.json",
-    },
-    snippet: stdJson,
-    format: "json",
-  },
-  {
-    name: "Gemini CLI",
-    cli: "gemini --mcp capy -- capy start",
-    configPaths: {
-      all: "~/.gemini/settings.json",
+      all: "~/.vscode-server/data/User/mcp.json",
     },
     snippet: `{
-  "mcpServers": {
+  "servers": {
     "capy": {
-      "command": "capy",
-      "args": ["start"]
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"]
     }
   }
 }`,
     format: "json",
+    note: "Make sure Copilot Chat is in Agent mode — MCP tools only work there.",
   },
   {
-    name: "Mistral CLI",
+    name: "Gemini CLI",
     configPaths: {
-      all: "~/.mistral/mcp.json",
+      all: "~/.gemini/settings.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
   },
   {
     name: "OpenCode",
     configPaths: {
-      all: "~/.config/opencode/config.toml",
+      all: "~/.config/opencode/opencode.json",
     },
-    snippet: `[mcp.capy]
-command = "capy"
-args = ["start"]`,
-    format: "toml",
+    snippet: `{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "capy": {
+      "type": "local",
+      "command": ["npx", "-y", "capy-mcp@latest"],
+      "enabled": true
+    }
+  }
+}`,
+    format: "json",
+    note: "For project-local, put opencode.json in your project root.",
   },
   {
     name: "Kimi Code",
+    cli: "kimi mcp add --transport stdio capy -- npx -y capy-mcp@latest",
     configPaths: {
       all: "~/.kimi/mcp.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
   },
   {
     name: "QwenCode",
     configPaths: {
-      all: "~/.qwen/mcp.json",
+      all: "settings.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
   },
 
-  /* ---- IDEs ------------------------------------------------------ */
+  /* ---- Verified IDEs --------------------------------------------- */
   {
-    name: "VS Code",
+    name: "Windsurf",
     configPaths: {
-      macOS: "~/Library/Application Support/Code/User/settings.json",
-      Windows: "%APPDATA%\\Code\\User\\settings.json",
-      Linux: "~/.config/Code/User/settings.json",
+      all: "~/.codeium/windsurf/mcp.json",
     },
-    snippet: vscodeJson,
-    format: "json",
-    note: "This adds Capy globally. For per-project config, use .vscode/settings.json instead.",
-  },
-  {
-    name: "Cursor",
-    configPaths: {
-      macOS: "~/Library/Application Support/Cursor/User/globalStorage/cursor-mcp.json",
-      Windows: "%APPDATA%\\Cursor\\User\\globalStorage\\cursor-mcp.json",
-      Linux: "~/.config/Cursor/User/globalStorage/cursor-mcp.json",
-    },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
   },
   {
     name: "Antigravity",
     configPaths: {
-      all: "Configured via Settings → MCP in the Antigravity app.",
+      all: "~/.gemini/antigravity/mcp_config.json",
     },
-    snippet: stdJson,
+    snippet: stdioViaNpxJson,
     format: "json",
-    note: "Paste this into the MCP configuration panel.",
+  },
+  {
+    name: "VS Code",
+    configPaths: {
+      all: "~/.vscode-server/data/User/mcp.json",
+    },
+    snippet: `{
+  "servers": {
+    "capy": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"]
+    }
+  }
+}`,
+    format: "json",
+    note: "Access via Command Palette: MCP: Open User Configuration.",
+  },
+  {
+    name: "Cursor",
+    configPaths: {
+      all: "~/.cursor/mcp.json",
+    },
+    snippet: stdioViaNpxJson,
+    format: "json",
+    note: "For per-project config, use .cursor/mcp.json.",
   },
   {
     name: "Zed",
@@ -181,24 +189,15 @@ args = ["start"]`,
     snippet: `{
   "context_servers": {
     "capy": {
-      "command": {
-        "path": "capy",
-        "args": ["start"]
-      }
+      "source": "custom",
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"],
+      "env": {}
     }
   }
 }`,
     format: "json",
-  },
-  {
-    name: "Windsurf",
-    configPaths: {
-      macOS: "~/.codeium/windsurf/mcp_config.json",
-      Windows: "%APPDATA%\\.codeium\\windsurf\\mcp_config.json",
-      Linux: "~/.codeium/windsurf/mcp_config.json",
-    },
-    snippet: stdJson,
-    format: "json",
+    note: 'The "source": "custom" field is required.',
   },
 ];
 
