@@ -1,10 +1,10 @@
 import Image from "next/image";
 
 const navLinks = [
-  { label: "Features", href: "#use-cases" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Setup", href: "#setup" },
-  { label: "Docs", href: "#docs" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Setup", href: "/#setup" },
+  { label: "Docs", href: "/docs" },
 ];
 
 export default function Footer() {
