@@ -121,8 +121,12 @@ function buildDiscoveryFacts(components: DiscoveredComponent[]): string[] {
   for (const comp of components) {
     const slashIndex = comp.path.lastIndexOf("/");
     const dir = slashIndex === -1 ? "." : comp.path.slice(0, slashIndex);
-    if (!byDir.has(dir)) byDir.set(dir, []);
-    byDir.get(dir)!.push(comp.exports[0] ?? comp.basename);
+    const existing = byDir.get(dir);
+    if (existing) {
+      existing.push(comp.exports[0] ?? comp.basename);
+    } else {
+      byDir.set(dir, [comp.exports[0] ?? comp.basename]);
+    }
   }
 
   const facts: string[] = [];

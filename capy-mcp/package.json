@@ -1,6 +1,6 @@
 {
   "name": "capy-mcp",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "MCP server that inspects a repo, returns a structured /preview brief, and writes a design-system JSON artifact for AI coding agents",
   "type": "module",
   "main": "dist/index.js",
