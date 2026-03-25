@@ -51,6 +51,7 @@ export interface DeliverableSpec {
   sections: string[];
   useExistingComponentsFirst: boolean;
   interactionFeatures: string[];
+  layoutGuidelines: string[];
 }
 
 export interface PreviewBrief {

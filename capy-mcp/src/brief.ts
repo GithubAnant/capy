@@ -53,6 +53,18 @@ export async function buildPreviewBrief(
         "Render color swatches in a consistent format with 6-character hex labels.",
         "Use a pointer cursor and click-to-copy behavior for color hex values.",
       ],
+      layoutGuidelines: [
+        "Use generous whitespace between sections — at least 4rem (64px) vertical gap between major sections.",
+        "Each section should have a clear heading with a subtle horizontal rule or divider.",
+        "Limit content width to a comfortable reading measure (max-width around 900–1000px).",
+        "Group related specimens with clear visual separation — use cards, bordered containers, or background shading.",
+        "Avoid cramming multiple unrelated specimens into a single row; give each specimen room to breathe.",
+        "Use consistent padding inside specimen containers (at least 1.5rem / 24px).",
+        "Color swatches should be large enough to evaluate (at least 64×64px) with clear labels below.",
+        "Typography specimens should show the actual font name, weight, and size metadata alongside the rendered text.",
+        "Add a sticky sidebar or top navigation for quick section jumping on large pages.",
+        "The overall page should feel like a polished design document, not a dense debug dump.",
+      ],
     },
     updateStrategy: buildUpdateStrategy(input.changedFiles),
     warnings,
@@ -132,6 +144,10 @@ function buildConstraints(framework: FrameworkInfo): string[] {
     "Keep the page neat, easy to scan, and aligned with the app's current design language.",
     "Include an icon inventory when the repo exposes app icons clearly enough to catalogue them.",
     "Show colors in a uniform swatch format with normalized 6-character hex labels and click-to-copy affordance.",
+    "The preview page MUST feel clean and spacious — use generous padding, wide margins, and clear visual hierarchy. Avoid dense, cramped layouts.",
+    "Separate each section with ample vertical whitespace (minimum 4rem gap). Each specimen group should be visually distinct.",
+    "Wrap specimens in well-padded containers with subtle borders or background contrast — never render raw components floating in open space.",
+    "Use the project's own design language for the preview page styling. Match background colors, border radii, and font stacks from the inspected globals/theme.",
   ];
 
   if (framework.needsConfirmation && framework.confirmationMessage) {
