@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Inter_Tight, Geist_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
+import { Databuddy } from "@databuddy/sdk/react";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,7 +30,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${interDisplay.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${interDisplay.variable} ${geistMono.variable} h-full antialiased`}
+    >
       <head>
         <script
           src="https://cdn.databuddy.cc/databuddy.js"
@@ -41,6 +45,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <SmoothScroll />
         {children}
+        <Databuddy clientId="8ad3841f-8f63-4fea-96c4-fde9ee8c223c" />
       </body>
     </html>
   );

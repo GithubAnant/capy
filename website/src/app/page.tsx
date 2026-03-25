@@ -14,6 +14,7 @@ export default function Home() {
     <div className="relative min-h-screen overflow-x-hidden bg-black">
 
       <Navbar />
+      
 
       <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col gap-28 px-4 pb-20 pt-16 md:px-6">
         <HeroSection />
@@ -23,6 +24,7 @@ export default function Home() {
         <PricingSection />
         <FAQSection />
       </main>
+      
 
       <Footer />
     </div>

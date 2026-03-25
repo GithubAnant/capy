@@ -15,7 +15,7 @@ function getConfig(client: Client) {
       code: `{
   "mcpServers": {
     "capy": {
-      "command": "capy",
+      "command": "capy-mcp",
       "args": ["start"]
     }
   }
@@ -30,7 +30,7 @@ function getConfig(client: Client) {
   "mcp": {
     "servers": {
       "capy": {
-        "command": "capy",
+        "command": "capy-mcp",
         "args": ["start"]
       }
     }
@@ -46,7 +46,7 @@ function getConfig(client: Client) {
   "context_servers": {
     "capy": {
       "command": {
-        "path": "capy",
+        "path": "capy-mcp",
         "args": ["start"]
       }
     }
@@ -61,7 +61,7 @@ function getConfig(client: Client) {
     code: `{
   "mcpServers": {
     "capy": {
-      "command": "capy",
+      "command": "capy-mcp",
       "args": ["start"]
     }
   }
@@ -85,7 +85,7 @@ export default function SetupSection() {
     },
     {
       title: "Start the server",
-      command: "capy start",
+      command: "capy-mcp start",
       description: "Launch the local MCP server. It runs in the background and listens for connections.",
     },
     {
