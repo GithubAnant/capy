@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "capy-mcp": {
+      "command": "npx",
+      "args": ["-y", "capy-mcp@latest"]
+    }
+  }
+}

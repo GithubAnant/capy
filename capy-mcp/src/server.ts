@@ -254,9 +254,9 @@ export function createServer(projectRoot = process.cwd()): McpServer {
         preview_entry_file: z.string(),
         component_count: z.number(),
         css_variable_count: z.number(),
-        read_first: z.array(z.string()),
-        warnings: z.array(z.string()),
-        summary: z.string(),
+        component_dirs: z.array(z.string()),
+        style_files: z.array(z.string()),
+        discovered_families: z.array(z.string()),
       },
     },
     async ({ artifactPath = ".capy/design-system.json", mode = "build", changedFiles, userGoal }) => {
@@ -275,9 +275,9 @@ export function createServer(projectRoot = process.cwd()): McpServer {
         preview_entry_file: artifact.repo.previewEntryFile,
         component_count: artifact.components.count,
         css_variable_count: artifact.tokens.cssVariables.length,
-        read_first: artifact.forAgent.readFirst.map((item) => item.path),
-        warnings: artifact.forAgent.gaps,
-        summary: artifact.forAgent.intent,
+        component_dirs: artifact.scan.componentDirs,
+        style_files: artifact.scan.styleFiles,
+        discovered_families: artifact.scan.discoveredFamilies,
       };
 
       return {
@@ -303,7 +303,8 @@ export function createServer(projectRoot = process.cwd()): McpServer {
 }
 
 export async function main() {
-  const server = createServer();
+  const projectRoot = process.argv[2] || process.cwd();
+  const server = createServer(projectRoot);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

@@ -51,8 +51,8 @@ test("buildDesignSystemArtifact captures css variables and components", async ()
     assert.equal(artifact.tokens.cssVariables.length, 2);
     assert.equal(artifact.components.items.some((component) => component.name === "Button"), true);
     assert.equal(artifact.components.items.some((component) => component.name === "UserCard"), true);
-    assert.match(artifact.forAgent.intent, /Build or refine \/preview/i);
-    assert.equal(artifact.forAgent.readFirst[0].path, "src/app/layout.tsx");
+    assert.equal(artifact.scan.componentDirs.includes("src/components"), true);
+    assert.equal(artifact.scan.styleFiles.includes("src/app/globals.css"), true);
   } finally {
     await cleanup(projectRoot);
   }
@@ -118,9 +118,9 @@ test("buildDesignSystemArtifact prioritizes likely primitives and usage examples
   try {
     const artifact = await buildDesignSystemArtifact(projectRoot, { mode: "build" });
 
-    assert.equal(artifact.forAgent.readFirst.some((item) => item.path === "src/components/Button.tsx"), true);
-    assert.match(artifact.forAgent.facts.join("\n"), /Likely actions files/i);
-    assert.match(artifact.forAgent.gaps.join("\n"), /No inputs candidates were detected/i);
+    assert.equal(artifact.components.items.some((item) => item.path === "src/components/Button.tsx"), true);
+    assert.match(artifact.scan.discoveredFamilies.join("\n"), /src\/components\/.*Button/i);
+    assert.ok(artifact.components.count >= 1);
   } finally {
     await cleanup(projectRoot);
   }

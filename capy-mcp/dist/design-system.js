@@ -1,6 +1,5 @@
 import { glob } from "glob";
 import { basename, join } from "path";
-import { buildPreviewBrief } from "./brief.js";
 import { buildComponentDiscoveryPlan } from "./component-discovery.js";
 import { readText, toPosixPath, writeText } from "./files.js";
 import { detectFramework } from "./framework.js";
@@ -10,28 +9,10 @@ export async function buildDesignSystemArtifact(projectRoot, input = {}) {
     const framework = await detectFramework(projectRoot);
     const projectFacts = await buildProjectFacts(projectRoot, framework);
     const discoveryPlan = await buildComponentDiscoveryPlan(projectRoot, projectFacts);
-    const previewBrief = await buildPreviewBrief(projectRoot, {
-        task: input.mode === "update" ? "update_preview" : "build_preview",
-        changedFiles: input.changedFiles,
-        userGoal: input.userGoal,
-    });
     const cssVariables = await collectCssVariables(projectRoot, projectFacts.likelyStyleFiles);
     const components = await collectComponents(projectRoot, projectFacts);
-    const readFirst = buildReadFirst(previewBrief, components, discoveryPlan.prioritizedFiles);
-    const bridges = await buildUsageBridges(projectRoot, projectFacts.likelyStyleFiles, components);
-    const gaps = buildGapNotes(projectFacts, components, cssVariables, discoveryPlan.missingFamilyGaps);
     const artifactPath = input.artifactPath ?? DEFAULT_ARTIFACT_PATH;
     return {
-        forAgent: {
-            intent: input.mode === "update"
-                ? "Update /preview incrementally. Read the files below first, then touch only the sections affected by the changed files unless shared foundations changed."
-                : "Build or refine /preview. Read the files below first, then mirror the repo's existing UI language instead of inventing a new one.",
-            readFirst,
-            facts: buildAgentFacts(projectFacts, components, cssVariables, discoveryPlan.discoveredFamilyFacts),
-            bridges,
-            gaps,
-            updateHints: previewBrief.updateStrategy,
-        },
         artifact: {
             generatedAt: new Date().toISOString(),
             mode: input.mode ?? "build",
@@ -50,6 +31,7 @@ export async function buildDesignSystemArtifact(projectRoot, input = {}) {
             pageDirs: projectFacts.likelyPageDirs,
             styleFiles: projectFacts.likelyStyleFiles,
             uiDirs: projectFacts.likelyUiDirs,
+            discoveredFamilies: discoveryPlan.discoveredFamilyFacts,
         },
         tokens: {
             cssVariables,
@@ -58,12 +40,6 @@ export async function buildDesignSystemArtifact(projectRoot, input = {}) {
         components: {
             count: components.length,
             items: components,
-        },
-        preview: {
-            route: projectFacts.previewRoute,
-            entryFile: projectFacts.previewEntryFile,
-            sections: previewBrief.deliverableSpec.sections,
-            updateStrategy: previewBrief.updateStrategy,
         },
     };
 }
@@ -169,132 +145,4 @@ function classifyCssVariable(name) {
 }
 function lineNumberAt(contents, index) {
     return contents.slice(0, index).split("\n").length;
-}
-function buildReadFirst(previewBrief, components, prioritizedFiles) {
-    const seen = new Set();
-    const readFirst = [];
-    const firstComponentByDir = new Map();
-    for (const component of components) {
-        const slashIndex = component.path.lastIndexOf("/");
-        if (slashIndex === -1)
-            continue;
-        const directory = component.path.slice(0, slashIndex);
-        if (!firstComponentByDir.has(directory)) {
-            firstComponentByDir.set(directory, component.path);
-        }
-    }
-    for (const step of previewBrief.inspectionPlan.slice(0, 2)) {
-        for (const target of step.targets) {
-            if (!looksLikeProjectPath(target))
-                continue;
-            const normalizedTarget = firstComponentByDir.get(target) ?? target;
-            if (seen.has(normalizedTarget))
-                continue;
-            seen.add(normalizedTarget);
-            readFirst.push({
-                path: normalizedTarget,
-                reason: step.reason,
-            });
-            if (readFirst.length >= 8) {
-                return readFirst;
-            }
-        }
-    }
-    for (const prioritizedFile of prioritizedFiles) {
-        if (seen.has(prioritizedFile))
-            continue;
-        seen.add(prioritizedFile);
-        readFirst.push({
-            path: prioritizedFile,
-            reason: "Likely reusable primitive or usage example. Read this before inventing preview-only specimens.",
-        });
-        if (readFirst.length >= 8) {
-            return readFirst;
-        }
-    }
-    for (const step of previewBrief.inspectionPlan.slice(2)) {
-        for (const target of step.targets) {
-            if (!looksLikeProjectPath(target))
-                continue;
-            const normalizedTarget = firstComponentByDir.get(target) ?? target;
-            if (seen.has(normalizedTarget))
-                continue;
-            seen.add(normalizedTarget);
-            readFirst.push({
-                path: normalizedTarget,
-                reason: step.reason,
-            });
-            if (readFirst.length >= 8) {
-                return readFirst;
-            }
-        }
-    }
-    return readFirst;
-}
-function buildAgentFacts(projectFacts, components, cssVariables, discoveredFamilyFacts) {
-    return [
-        `Use ${projectFacts.framework} conventions.`,
-        `Implement /preview at ${projectFacts.previewEntryFile}.`,
-        "Use repo-relative paths only.",
-        `Found ${components.length} component candidates and ${cssVariables.length} CSS variables.`,
-        ...discoveredFamilyFacts,
-    ];
-}
-function buildGapNotes(projectFacts, components, cssVariables, discoveryGaps) {
-    const gaps = [...discoveryGaps];
-    if (components.length === 0) {
-        gaps.push("No components were detected. Grep src/components, src/ui, src/features, components, ui, or features before assuming the app has no reusable UI.");
-    }
-    if (cssVariables.length === 0 && projectFacts.likelyStyleFiles.length > 0) {
-        gaps.push(`No CSS variables were detected. Read ${projectFacts.likelyStyleFiles[0]} directly and look for literal classes, theme config, or inline color tokens.`);
-    }
-    if (projectFacts.likelyStyleFiles.length === 0) {
-        gaps.push("No global style files were detected. Inspect app shell files and component code directly for layout and color usage.");
-    }
-    return gaps;
-}
-async function buildUsageBridges(projectRoot, styleFiles, components) {
-    const bridges = [];
-    for (const relativePath of styleFiles) {
-        const fileContents = await readText(join(projectRoot, relativePath));
-        if (!fileContents)
-            continue;
-        if (fileContents.includes("hsl(var(--")) {
-            bridges.push(`Theme tokens are bridged through hsl(var(--...)) in ${relativePath}.`);
-            break;
-        }
-    }
-    const hexByFile = await collectHexLiterals(projectRoot, components);
-    for (const [path, hexValues] of hexByFile.slice(0, 3)) {
-        bridges.push(`Literal accents also appear in ${path}: ${hexValues.join(", ")}.`);
-    }
-    return bridges;
-}
-async function collectHexLiterals(projectRoot, components) {
-    const matches = [];
-    for (const component of components) {
-        const contents = await readText(join(projectRoot, component.path));
-        if (!contents)
-            continue;
-        const hexMatches = Array.from(contents.matchAll(/#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\b/g))
-            .map((match) => normalizeHex(match[0]))
-            .filter((value, index, values) => values.indexOf(value) === index);
-        if (hexMatches.length > 0) {
-            matches.push([component.path, hexMatches.slice(0, 4)]);
-        }
-    }
-    return matches;
-}
-function normalizeHex(hex) {
-    const normalized = hex.replace("#", "").toUpperCase();
-    if (normalized.length === 3) {
-        return `#${normalized
-            .split("")
-            .map((char) => `${char}${char}`)
-            .join("")}`;
-    }
-    return `#${normalized}`;
-}
-function looksLikeProjectPath(target) {
-    return target.includes("/") || /^[A-Za-z0-9._-]+\.(?:tsx|ts|jsx|js|css|scss|sass|less)$/.test(target);
 }

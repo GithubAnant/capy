@@ -1,0 +1,12 @@
+{
+  "name": "capy",
+  "version": "1.0.0",
+  "description": "Inspect any repo and build a /preview page with structured briefs, design-system extraction, and incremental updates.",
+  "author": {
+    "name": "GithubAnant"
+  },
+  "homepage": "https://github.com/GithubAnant/capy",
+  "repository": "https://github.com/GithubAnant/capy",
+  "license": "MIT",
+  "keywords": ["preview", "design-system", "ui", "mcp"]
+}

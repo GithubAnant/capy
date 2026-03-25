@@ -1,0 +1,50 @@
+{
+  "name": "opencode-capy",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for Capy - AI preview and design system tooling",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "preview",
+    "design-system",
+    "mcp",
+    "nextjs",
+    "react",
+    "capy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GithubAnant/capy.git",
+    "directory": "opencode-capy"
+  },
+  "bugs": {
+    "url": "https://github.com/GithubAnant/capy/issues"
+  },
+  "author": "Anant Singh <anantsinghal@example.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/GithubAnant/capy/tree/main/opencode-capy#readme",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "latest",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0",
+    "capy-mcp": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "capy-mcp": {
+      "optional": true
+    }
+  }
+}

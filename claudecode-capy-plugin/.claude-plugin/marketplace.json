@@ -1,0 +1,12 @@
+{
+  "name": "capy",
+  "owner": {
+    "name": "GithubAnant"
+  },
+  "plugins": [
+    {
+      "name": "capy",
+      "source": "."
+    }
+  ]
+}

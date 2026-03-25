@@ -1,121 +1,46 @@
-import { glob } from "glob";
 import { basename, join } from "path";
+import { glob } from "glob";
 import { readText, toPosixPath } from "./files.js";
 import type { ProjectFacts } from "./types.js";
 
-interface ComponentFamilyDefinition {
-  section: string;
-  label: string;
-  searchTerms: string[];
-  contentPatterns?: RegExp[];
-  critical?: boolean;
-}
-
-interface DiscoveryFile {
+interface DiscoveredComponent {
   path: string;
   basename: string;
   exports: string[];
-  contents: string;
-}
-
-interface FamilyHit {
-  path: string;
-  score: number;
-  matchedTerms: string[];
 }
 
 export interface ComponentDiscoveryPlan {
-  searchStepTargets: string[];
+  allDiscoveredComponents: DiscoveredComponent[];
   prioritizedFiles: string[];
   discoveredFamilyFacts: string[];
   missingFamilyGaps: string[];
   instruction: string;
 }
 
-const COMPONENT_FAMILIES: ComponentFamilyDefinition[] = [
-  {
-    section: "Actions",
-    label: "actions",
-    searchTerms: ["Button", "IconButton", "LinkButton", "CTA", "SubmitButton", "ActionButton"],
-    critical: true,
-  },
-  {
-    section: "Inputs",
-    label: "inputs",
-    searchTerms: ["Input", "TextField", "Textarea", "Select", "Checkbox", "Radio", "Switch", "Combobox", "FormField"],
-    critical: true,
-  },
-  {
-    section: "Navigation",
-    label: "navigation",
-    searchTerms: ["Tabs", "Breadcrumb", "Pagination", "Nav", "Menu", "Sidebar"],
-  },
-  {
-    section: "Data Display",
-    label: "data display",
-    searchTerms: ["Card", "Badge", "Chip", "Avatar", "Table", "List", "Stat", "EmptyState"],
-  },
-  {
-    section: "Feedback",
-    label: "feedback",
-    searchTerms: ["Toast", "Toaster", "Snackbar", "Alert", "Banner", "Skeleton", "Progress", "Spinner"],
-    contentPatterns: [/toast\(/i, /\buseToast\b/i, /\bToaster\b/i, /\bSnackbar\b/i],
-    critical: true,
-  },
-  {
-    section: "Overlays",
-    label: "overlays",
-    searchTerms: ["Dialog", "Modal", "Drawer", "Sheet", "Popover", "Tooltip", "Dropdown"],
-    critical: true,
-  },
-];
-
+/**
+ * Discover components by scanning the filesystem — no hardcoded family lists.
+ *
+ * Strategy:
+ * 1. Glob for ALL source files within discovered component/UI dirs
+ * 2. Extract PascalCase exports from each file
+ * 3. Everything with a PascalCase export is a component
+ * 4. Classify what we found into loose categories for the agent
+ */
 export async function buildComponentDiscoveryPlan(
   projectRoot: string,
   projectFacts: ProjectFacts
 ): Promise<ComponentDiscoveryPlan> {
-  const files = await readDiscoveryFiles(projectRoot, projectFacts);
-  const familyHits = COMPONENT_FAMILIES.map((family) => ({
-    family,
-    hits: findFamilyHits(files, family).slice(0, 3),
-  }));
+  const components = await scanForComponents(projectRoot, projectFacts);
 
-  const searchStepTargets = familyHits.map(({ family, hits }) => {
-    const termList = family.searchTerms.slice(0, 4).join(", ");
-    if (hits.length === 0) {
-      return `${family.section}: search ${termList}`;
-    }
+  // Group components into loose categories for the agent's benefit
+  const prioritizedFiles = components.map((c) => c.path).slice(0, 12);
 
-    return `${family.section}: search ${termList}; candidates ${hits.map((hit) => hit.path).join(", ")}`;
-  });
-
-  const prioritizedFiles = unique(
-    familyHits.flatMap(({ hits }) => hits.map((hit) => hit.path))
-  ).slice(0, 10);
-
-  const discoveredFamilyFacts = familyHits
-    .filter(({ hits }) => hits.length > 0)
-    .slice(0, 4)
-    .map(({ family, hits }) => {
-      const paths = hits.map((hit) => hit.path).join(", ");
-      return `Likely ${family.label} files: ${paths}.`;
-    });
-
-  const missingFamilyGaps = familyHits
-    .filter(({ family, hits }) => family.critical && hits.length === 0)
-    .map(({ family }) => {
-      const terms = family.searchTerms.slice(0, 6).join(", ");
-      if (family.section === "Feedback") {
-        return `No feedback candidates were detected. Search for ${terms}, toast(), useToast, providers, or real usage sites before leaving Feedback empty.`;
-      }
-
-      return `No ${family.label} candidates were detected. Search for ${terms} and real usage examples before deciding the ${family.section} section is absent.`;
-    });
-
-  const instruction = buildInstruction(prioritizedFiles);
+  const discoveredFamilyFacts = buildDiscoveryFacts(components);
+  const missingFamilyGaps = buildGaps(components);
+  const instruction = buildInstruction(components, prioritizedFiles);
 
   return {
-    searchStepTargets,
+    allDiscoveredComponents: components,
     prioritizedFiles,
     discoveredFamilyFacts,
     missingFamilyGaps,
@@ -123,11 +48,30 @@ export async function buildComponentDiscoveryPlan(
   };
 }
 
-async function readDiscoveryFiles(
+/**
+ * Scan the project for all files that export PascalCase identifiers.
+ * Uses the dynamically-discovered component dirs from project.ts,
+ * falls back to a broad scan if none were found.
+ */
+async function scanForComponents(
   projectRoot: string,
   projectFacts: ProjectFacts
-): Promise<DiscoveryFile[]> {
-  const sourceFiles = await glob(["**/*.{ts,tsx,js,jsx}"], {
+): Promise<DiscoveredComponent[]> {
+  // Build glob patterns from discovered dirs
+  const searchDirs = new Set([
+    ...projectFacts.likelyComponentDirs,
+    ...projectFacts.likelyUiDirs,
+  ]);
+
+  // If no component dirs were discovered, return empty instead of
+  // falling back to a repo-wide scan that reads every file's contents.
+  if (searchDirs.size === 0) {
+    return [];
+  }
+
+  const patterns = Array.from(searchDirs).map((dir) => `${dir}/**/*.{ts,tsx,js,jsx}`);
+
+  const sourceFiles = await glob(patterns, {
     cwd: projectRoot,
     nodir: true,
     ignore: [
@@ -146,115 +90,93 @@ async function readDiscoveryFiles(
     ],
   });
 
-  const sourceRoots = new Set([
-    ...projectFacts.likelyComponentDirs,
-    ...projectFacts.likelyPageDirs,
-    ...projectFacts.likelyUiDirs,
-    "src",
-    "app",
-    "pages",
-    "routes",
-    "components",
-    "ui",
-    "features",
-  ]);
+  const components: DiscoveredComponent[] = [];
 
-  const filteredFiles = sourceFiles
-    .map((file) => toPosixPath(file))
-    .filter((file) => {
-      if (!file.includes("/")) return false;
-      return Array.from(sourceRoots).some((root) => file === root || file.startsWith(`${root}/`));
-    })
-    .sort();
+  for (const file of sourceFiles.map((f) => toPosixPath(f)).sort()) {
+    const contents = (await readText(join(projectRoot, file))) ?? "";
+    const exports = extractExportCandidates(contents);
 
-  return Promise.all(
-    filteredFiles.map(async (relativePath) => {
-      const contents = (await readText(join(projectRoot, relativePath))) ?? "";
-      return {
-        path: relativePath,
-        basename: basename(relativePath).replace(/\.[^.]+$/, ""),
-        exports: extractExportCandidates(contents),
-        contents,
-      } satisfies DiscoveryFile;
-    })
-  );
-}
-
-function findFamilyHits(files: DiscoveryFile[], family: ComponentFamilyDefinition): FamilyHit[] {
-  const hits: FamilyHit[] = [];
-
-  for (const file of files) {
-    const matchedTerms = new Set<string>();
-    let score = 0;
-
-    for (const term of family.searchTerms) {
-      if (matchesFile(file, term)) {
-        matchedTerms.add(term);
-        score += scoreTerm(file, term);
-      }
+    // A file is a component if it has at least one PascalCase export
+    if (exports.length > 0) {
+      components.push({
+        path: file,
+        basename: basename(file).replace(/\.[^.]+$/, ""),
+        exports,
+      });
     }
-
-    for (const pattern of family.contentPatterns ?? []) {
-      if (pattern.test(file.contents)) {
-        matchedTerms.add(pattern.source);
-        score += 2;
-      }
-    }
-
-    if (score === 0) continue;
-
-    if (file.path.includes("/components/") || file.path.includes("/ui/")) {
-      score += 2;
-    }
-
-    hits.push({
-      path: file.path,
-      score,
-      matchedTerms: Array.from(matchedTerms),
-    });
   }
 
-  return hits.sort((left, right) => right.score - left.score || left.path.localeCompare(right.path));
+  return components;
 }
 
-function matchesFile(file: DiscoveryFile, term: string): boolean {
-  const lowerTerm = term.toLowerCase();
-  const lowerPath = file.path.toLowerCase();
-  const lowerBasename = file.basename.toLowerCase();
+/**
+ * Build discovery facts — a short summary of what was found, organized
+ * by directory structure rather than hardcoded families.
+ */
+function buildDiscoveryFacts(components: DiscoveredComponent[]): string[] {
+  if (components.length === 0) return [];
 
-  if (lowerBasename === lowerTerm || lowerBasename.endsWith(lowerTerm)) return true;
-  if (lowerPath.includes(`/${lowerTerm}.`) || lowerPath.includes(`/${lowerTerm}/`)) return true;
+  // Group by directory
+  const byDir = new Map<string, string[]>();
+  for (const comp of components) {
+    const slashIndex = comp.path.lastIndexOf("/");
+    const dir = slashIndex === -1 ? "." : comp.path.slice(0, slashIndex);
+    const existing = byDir.get(dir);
+    if (existing) {
+      existing.push(comp.exports[0] ?? comp.basename);
+    } else {
+      byDir.set(dir, [comp.exports[0] ?? comp.basename]);
+    }
+  }
 
-  if (file.exports.some((exportName) => exportName.toLowerCase() === lowerTerm)) return true;
-  if (file.exports.some((exportName) => exportName.toLowerCase().includes(lowerTerm))) return true;
+  const facts: string[] = [];
+  for (const [dir, names] of byDir) {
+    const listed = names.slice(0, 5).join(", ");
+    const suffix = names.length > 5 ? ` and ${names.length - 5} more` : "";
+    facts.push(`${dir}/: ${listed}${suffix}.`);
+  }
 
-  return new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(file.contents);
+  return facts.slice(0, 8);
 }
 
-function scoreTerm(file: DiscoveryFile, term: string): number {
-  const lowerTerm = term.toLowerCase();
-  const lowerBasename = file.basename.toLowerCase();
+/**
+ * Build gap notes — only warn about genuinely concerning gaps,
+ * not prescriptive "you should have inputs" type warnings.
+ */
+function buildGaps(components: DiscoveredComponent[]): string[] {
+  const gaps: string[] = [];
 
-  if (lowerBasename === lowerTerm) return 8;
-  if (lowerBasename.endsWith(lowerTerm)) return 6;
-  if (file.exports.some((exportName) => exportName.toLowerCase() === lowerTerm)) return 6;
-  if (file.exports.some((exportName) => exportName.toLowerCase().includes(lowerTerm))) return 4;
-  return 2;
+  if (components.length === 0) {
+    gaps.push(
+      "No components were discovered. The scanner found no files with PascalCase exports in the project. You should manually search src/, components/, ui/, features/, lib/, or similar directories to find UI code."
+    );
+  }
+
+  return gaps;
 }
 
-function buildInstruction(prioritizedFiles: string[]): string {
-  const searchLead =
-    "After the first local scan, actively search the repo for real buttons, inputs, selects, tabs, cards, badges, dialogs, popovers, tooltips, dropdowns, toasts/snackbars, alerts, skeletons, and loading or empty states.";
-  const usageLead =
-    "Use actual component files and usage examples. If you only find hooks or providers, trace one real usage path and mirror that behavior in /preview instead of inventing a fake specimen.";
-  const placementLead =
-    "Place every real family you find into the matching preview section. If a family is absent, label it as not present in the repo.";
+/**
+ * Build the instruction string for the agent — tell it how to traverse
+ * and find things rather than listing specific things to look for.
+ */
+function buildInstruction(
+  components: DiscoveredComponent[],
+  prioritizedFiles: string[]
+): string {
+  const traversalGuide =
+    "Traverse the repo's component directories. Every file that exports a PascalCase identifier is a component. Read real usage of each component before building /preview sections. If a component looks like a page section, group it under 'Feature or Page Sections'. If it is a small reusable primitive, group it under the appropriate UI category.";
+
+  const usageGuide =
+    "Use actual component files and real usage examples. If you only find hooks or providers, trace one real usage path and mirror that behavior in /preview instead of inventing a fake specimen.";
+
+  const placementGuide =
+    "Place every component you find into the preview layout based on its actual role. If something does not fit a standard category, create a section for it. Do not invent components that don't exist in the repo, and do not omit components that do.";
 
   if (prioritizedFiles.length === 0) {
-    return `${searchLead} ${usageLead} ${placementLead}`;
+    return `${traversalGuide} ${usageGuide} ${placementGuide}`;
   }
 
-  return `${searchLead} Start with ${prioritizedFiles.slice(0, 6).join(", ")}. ${usageLead} ${placementLead}`;
+  return `${traversalGuide} Start with ${prioritizedFiles.slice(0, 6).join(", ")}. ${usageGuide} ${placementGuide}`;
 }
 
 function extractExportCandidates(contents: string): string[] {
@@ -274,12 +196,4 @@ function extractExportCandidates(contents: string): string[] {
   }
 
   return Array.from(exportNames);
-}
-
-function unique(values: string[]): string[] {
-  return Array.from(new Set(values));
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
