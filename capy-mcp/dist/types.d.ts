@@ -66,17 +66,6 @@ export interface ComponentRecord {
     kind: "primitive" | "component" | "feature" | "unknown";
 }
 export interface DesignSystemArtifact {
-    forAgent: {
-        intent: string;
-        readFirst: Array<{
-            path: string;
-            reason: string;
-        }>;
-        facts: string[];
-        bridges: string[];
-        gaps: string[];
-        updateHints: string[];
-    };
     artifact: {
         generatedAt: string;
         mode: "build" | "update";
@@ -95,6 +84,7 @@ export interface DesignSystemArtifact {
         pageDirs: string[];
         styleFiles: string[];
         uiDirs: string[];
+        discoveredFamilies: string[];
     };
     tokens: {
         cssVariables: CssVariableRecord[];
@@ -103,12 +93,6 @@ export interface DesignSystemArtifact {
     components: {
         count: number;
         items: ComponentRecord[];
-    };
-    preview: {
-        route: string;
-        entryFile: string;
-        sections: string[];
-        updateStrategy: string[];
     };
 }
 export interface PreviewStateSnapshot {

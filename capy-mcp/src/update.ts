@@ -40,7 +40,7 @@ export async function runPreviewUpdate(
 
   await writePreviewStateSnapshot(projectRoot, snapshotPath, diffResult.snapshot);
 
-  const warnings = [...previewBrief.warnings];
+  const warnings: string[] = [];
 
   if (diffResult.baselineCreated) {
     warnings.unshift(

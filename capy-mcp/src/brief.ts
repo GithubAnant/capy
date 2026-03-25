@@ -15,6 +15,7 @@ const SECTION_ORDER = [
   "Data Display",
   "Feedback",
   "Overlays",
+  "Components",
   "Feature or Page Sections",
 ];
 
@@ -177,6 +178,10 @@ function buildWarnings(
 
   warnings.push(...discoveryGaps);
 
+  warnings.push(
+    "IMPORTANT: Add .capy/ and the created preview route/page files (e.g. app/preview/, pages/preview.tsx) to .gitignore so they are not committed to the repository."
+  );
+
   return warnings;
 }
 
@@ -192,5 +197,5 @@ function buildInstructions(
 
   const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
 
-  return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. ${discoveryInstruction}`;
+  return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. ${discoveryInstruction} IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }

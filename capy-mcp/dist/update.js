@@ -29,7 +29,7 @@ export async function runPreviewUpdate(projectRoot, input = {}) {
         userGoal: input.userGoal,
     });
     await writePreviewStateSnapshot(projectRoot, snapshotPath, diffResult.snapshot);
-    const warnings = [...previewBrief.warnings];
+    const warnings = [];
     if (diffResult.baselineCreated) {
         warnings.unshift("No prior preview-state snapshot was found. Capy created a baseline snapshot, so this run cannot infer incremental changes automatically.");
     }
