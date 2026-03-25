@@ -21,7 +21,7 @@ export default function Navbar() {
   const [stars, setStars] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("https://api.github.com/repos/GithubAnant/toolss")
+    fetch("https://api.github.com/repos/GithubAnant/capy")
       .then((res) => res.json())
       .then((data) => {
         if (data.stargazers_count != null) {
@@ -67,7 +67,7 @@ export default function Navbar() {
         </nav>
 
         <a
-          href="https://github.com/GithubAnant/toolss"
+          href="https://github.com/GithubAnant/capy"
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-[0.88rem] font-normal text-[#858585] transition-all duration-200 hover:bg-white/10 hover:text-[#F0F0F3]"

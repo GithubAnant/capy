@@ -25,7 +25,7 @@ export function PricingWhyFreeCard() {
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
           <a
-            href="https://github.com/GithubAnant/toolss"
+            href="https://github.com/GithubAnant/capy"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-white/8 px-3.5 py-2 text-[0.8rem] font-medium text-[#858585] hover:bg-white/12 hover:text-[#F0F0F3]"

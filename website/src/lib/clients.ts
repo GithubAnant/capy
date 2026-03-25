@@ -1,6 +1,6 @@
 export const clients = [
   { name: "Claude Code", category: "agent", icon: "/icons/claude-code.svg", iconClass: undefined },
-  { name: "Claude", category: "agent", icon: "/icons/claude.svg", iconClass: undefined },
+  { name: "Claude Desktop", category: "agent", icon: "/icons/claude.svg", iconClass: undefined },
   { name: "Cline", category: "agent", icon: "/icons/cline.svg", iconClass: undefined },
   { name: "Codex", category: "agent", icon: "/icons/codex.svg", iconClass: undefined },
   { name: "Conductor", category: "agent", icon: "/icons/conductor.svg", iconClass: "h-5 w-5" },
