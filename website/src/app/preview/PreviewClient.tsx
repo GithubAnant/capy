@@ -11,6 +11,8 @@ import FeaturesSection from "@/components/sections/FeaturesSection";
 import HeroPreview from "@/components/sections/HeroPreview";
 import HeroSection from "@/components/sections/HeroSection";
 import SetupSection from "@/components/sections/SetupSection";
+import Footer from "@/components/layout/Footer";
+import PreviewSkeleton from "@/components/ui/PreviewSkeleton";
 import { clients } from "@/lib/clients";
 
 type SnapshotToken = {
@@ -401,6 +403,9 @@ export default function PreviewClient({
             title="Real route content"
             description="These are the actual exported sections from the landing page, placed in a calmer reading order so you can inspect behavior and composition without the full homepage chrome."
           />
+          <div className="flex justify-center">
+            <PreviewSkeleton />
+          </div>
           <div className="space-y-10">
             <Surface>
               <HeroSection />
@@ -420,6 +425,10 @@ export default function PreviewClient({
           </div>
         </section>
       </main>
+
+      <div className="px-4 md:px-6">
+        <Footer />
+      </div>
     </div>
   );
 }
