@@ -12,9 +12,6 @@ export default function HeroSection() {
         <a href="https://capy.anants.studio/docs" className="cursor-pointer rounded-sm bg-[#F0F0F3] px-3.5 py-1.5 text-[0.82rem] font-medium transition-all duration-300 hover:bg-[#d4d4d4]" style={{ color: '#000000' }}>
           Get started
         </a>
-        <a href="#" className="rounded-sm px-3.5 py-1.5 text-[0.82rem] font-medium text-[#F0F0F3] transition-all duration-300 hover:bg-[#3a3a3a] hover:text-white">
-          Discover product
-        </a>
       </div>
     </section>
   );
