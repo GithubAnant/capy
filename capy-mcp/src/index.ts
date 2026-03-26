@@ -7,6 +7,7 @@ export type {
   ComponentRecord,
   CssVariableRecord,
   DesignSystemArtifact,
+  DesignGuidance,
   DesignSystemBuildInput,
   DeliverableSpec,
   FrameworkInfo,

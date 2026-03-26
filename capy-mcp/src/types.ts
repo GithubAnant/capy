@@ -42,6 +42,16 @@ export interface InspectionStep {
   reason: string;
 }
 
+export interface DesignGuidance {
+  pageStructure: string[];
+  whitespace: string[];
+  typography: string[];
+  cards: string[];
+  color: string[];
+  specimens: string[];
+  responsive: string[];
+}
+
 export interface DeliverableSpec {
   goal: string;
   layout: "bidirectional-scroll";
@@ -52,6 +62,7 @@ export interface DeliverableSpec {
   useExistingComponentsFirst: boolean;
   interactionFeatures: string[];
   layoutGuidelines: string[];
+  designGuidance: DesignGuidance;
 }
 
 export interface PreviewBrief {

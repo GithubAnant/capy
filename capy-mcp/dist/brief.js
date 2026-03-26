@@ -53,10 +53,22 @@ export async function buildPreviewBrief(projectRoot, input) {
                 "Add a sticky sidebar or top navigation for quick section jumping on large pages.",
                 "The overall page should feel like a polished design document, not a dense debug dump.",
             ],
+            designGuidance: buildDesignGuidance(),
         },
         updateStrategy: buildUpdateStrategy(input.changedFiles),
         warnings,
         instructions: buildInstructions(projectFacts, input, discoveryPlan.instruction),
+    };
+}
+function buildDesignGuidance() {
+    return {
+        pageStructure: ["Sticky frosted-glass header (backdrop-filter:blur(12px)), max-width:960px content column, anchor IDs on headings with scroll-margin-top:5rem."],
+        whitespace: ["Section gap:6rem, sub-section gap:3rem, specimen gap:1.5rem, container padding:2rem."],
+        typography: ["Section titles 1.75rem/700, sub-headings 1.125rem/600 uppercase, labels 0.75rem monospace, body 0.875rem/1.6."],
+        cards: ["12px radius, 1px border rgba(0,0,0,0.10), background #fafafa, shadow 0 1px 3px rgba(0,0,0,0.04), inner gap:1.5rem."],
+        color: ["80×80px swatches (radius 10px) in auto-fill grid, grouped by role, inset shadow on light swatches, monospace hex label + click-to-copy."],
+        specimens: ["Components at natural size in padded cards, icon grid 48×48px cells, 'Show all N' toggle after 12 items."],
+        responsive: ["Below 768px: single-column, 4rem section gap, 1rem padding. Below 640px: collapsible nav. Horizontal rows: overflow-x:auto + scroll-snap."],
     };
 }
 function buildInspectionPlan(projectFacts, discoveryPlan) {
@@ -127,10 +139,7 @@ function buildConstraints(framework) {
         "Keep the page neat, easy to scan, and aligned with the app's current design language.",
         "Include an icon inventory when the repo exposes app icons clearly enough to catalogue them.",
         "Show colors in a uniform swatch format with normalized 6-character hex labels and click-to-copy affordance.",
-        "The preview page MUST feel clean and spacious — use generous padding, wide margins, and clear visual hierarchy. Avoid dense, cramped layouts.",
-        "Separate each section with ample vertical whitespace (minimum 4rem gap). Each specimen group should be visually distinct.",
-        "Wrap specimens in well-padded containers with subtle borders or background contrast — never render raw components floating in open space.",
-        "Use the project's own design language for the preview page styling. Match background colors, border radii, and font stacks from the inspected globals/theme.",
+        "Follow the concrete CSS values in deliverable_spec.design_guidance for spacing, cards, typography, color swatches, and responsive breakpoints. Use the project's own design language where it overrides those defaults.",
     ];
     if (framework.needsConfirmation && framework.confirmationMessage) {
         constraints.push(framework.confirmationMessage);
@@ -168,5 +177,5 @@ function buildInstructions(projectFacts, input, discoveryInstruction) {
         ? "Update the existing /preview route incrementally."
         : "Create the /preview route from scratch.";
     const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
-    return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. ${discoveryInstruction} IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
+    return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for exact spacing, card styles, typography, and specimen rendering patterns. ${discoveryInstruction} IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }

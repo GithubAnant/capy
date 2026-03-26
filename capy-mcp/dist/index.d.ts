@@ -3,4 +3,4 @@ export { buildDesignSystemArtifact, writeDesignSystemArtifact } from "./design-s
 export { detectFramework } from "./framework.js";
 export { createServer, main } from "./server.js";
 export { buildPreviewStateSnapshot, runPreviewUpdate, writePreviewStateSnapshot } from "./update.js";
-export type { ComponentRecord, CssVariableRecord, DesignSystemArtifact, DesignSystemBuildInput, DeliverableSpec, FrameworkInfo, FrameworkKind, InspectionStep, PreviewBrief, PreviewStateSnapshot, PreviewUpdateInput, PreviewUpdateResult, ProjectFacts, RoutingStyle, } from "./types.js";
+export type { ComponentRecord, CssVariableRecord, DesignSystemArtifact, DesignGuidance, DesignSystemBuildInput, DeliverableSpec, FrameworkInfo, FrameworkKind, InspectionStep, PreviewBrief, PreviewStateSnapshot, PreviewUpdateInput, PreviewUpdateResult, ProjectFacts, RoutingStyle, } from "./types.js";
