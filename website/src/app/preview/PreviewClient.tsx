@@ -192,13 +192,13 @@ export default function PreviewClient({
   const [selectedClient, setSelectedClient] = useState<typeof clients[number]>(clients[0]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#111111] text-[var(--foreground)]">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#111111] text-foreground">
 
       <header className="sticky top-0 z-30 bg-[#111111]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-6">
           <div>
-            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-[var(--muted)]">Capy Preview</p>
-            <h1 className="mt-2 font-display text-[1.35rem] leading-none text-[var(--foreground)] md:text-[1.7rem]">
+            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-(--muted)">Capy Preview</p>
+            <h1 className="mt-2 font-display text-[1.35rem] leading-none text-foreground md:text-[1.7rem]">
               Clean system surface for the current site
             </h1>
           </div>
@@ -207,7 +207,7 @@ export default function PreviewClient({
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="text-[0.88rem] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
+                className="text-[0.88rem] text-(--muted) transition-colors hover:text-foreground"
               >
                 {section.label}
               </a>
