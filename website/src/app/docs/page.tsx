@@ -76,15 +76,15 @@ function ConfigPanel({ config }: { config: ClientConfig }) {
         </div>
       )}
 
-      {/* Config file */}
+      {/* Manual config — stepped layout */}
       <div>
-        <h3 className="mb-2 text-[0.85rem] font-medium text-[#F0F0F3]">
+        <h3 className="mb-4 text-[0.85rem] font-medium text-[#F0F0F3]">
           {config.cli ? "Or add manually" : "Config file"}
         </h3>
 
         {/* OS tabs */}
         {availableOS.length > 1 && (
-          <div className="mb-3 inline-flex rounded-md bg-[#171615] p-0.5">
+          <div className="mb-5 inline-flex rounded-md bg-[#171615] p-0.5">
             {availableOS.map((os) => (
               <button
                 key={os}
@@ -102,32 +102,49 @@ function ConfigPanel({ config }: { config: ClientConfig }) {
           </div>
         )}
 
-        {/* File path */}
-        <p className="mb-3 text-[0.8rem] text-[#858585]">
-          Add to{" "}
-          <code className="rounded bg-[#171615] px-1.5 py-0.5 font-mono text-[0.75rem] text-[#E8E0D6]">
-            {configPath}
-          </code>
-        </p>
-
-        {/* Open file command */}
-        {openCommand && (
-          <div className="mb-3 flex items-center gap-2 rounded-lg bg-[#171615] px-3 py-2">
-            <span className="font-mono text-[0.72rem] text-[#858585]">$</span>
-            <code className="flex-1 font-mono text-[0.75rem] text-[#E8E0D6]">
-              {openCommand}
-            </code>
-            <CopyButton text={openCommand} />
+        <div className="flex flex-col gap-5">
+          {/* Step 1 — Open config file */}
+          <div className="flex gap-3">
+            <span className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-[0.65rem] font-semibold text-[#F0F0F3]">
+              1
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="mb-2 text-[0.8rem] text-[#858585]">
+                Open{" "}
+                <code className="rounded bg-[#171615] px-1.5 py-0.5 font-mono text-[0.75rem] text-[#E8E0D6]">
+                  {configPath}
+                </code>
+              </p>
+              {openCommand && (
+                <div className="flex items-center gap-2 rounded-lg bg-[#171615] px-3 py-2">
+                  <span className="font-mono text-[0.72rem] text-[#858585]">$</span>
+                  <code className="flex-1 overflow-x-auto font-mono text-[0.75rem] text-[#E8E0D6]">
+                    {openCommand}
+                  </code>
+                  <CopyButton text={openCommand} />
+                </div>
+              )}
+            </div>
           </div>
-        )}
 
-        {/* Snippet */}
-        <CodeBlock code={config.snippet} label={config.format.toUpperCase()} />
+          {/* Step 2 — Paste snippet */}
+          <div className="flex gap-3">
+            <span className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-[0.65rem] font-semibold text-[#F0F0F3]">
+              2
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="mb-2 text-[0.8rem] text-[#858585]">
+                Paste this into the file
+              </p>
+              <CodeBlock code={config.snippet} label={config.format.toUpperCase()} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Note */}
       {config.note && (
-        <p className="text-[0.8rem] leading-relaxed text-[#858585]">
+        <p className="mt-1 text-[0.8rem] leading-relaxed text-[#858585]">
           {config.note}
         </p>
       )}
