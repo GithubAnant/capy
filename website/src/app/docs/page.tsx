@@ -33,6 +33,17 @@ function CodeBlock({ code, label }: { code: string; label?: string }) {
   );
 }
 
+function getOpenCommand(path: string, os: OS | "all"): string {
+  const resolvedOS = os === "all" ? "macOS" : os;
+  const opener =
+    resolvedOS === "Windows"
+      ? "start"
+      : resolvedOS === "Linux"
+        ? "xdg-open"
+        : "open";
+  return `${opener} ${path}`;
+}
+
 function ConfigPanel({ config }: { config: ClientConfig }) {
   const pathKeys = Object.keys(config.configPaths);
   const hasMultiOS = pathKeys.length > 1 || !pathKeys.includes("all");
@@ -47,6 +58,10 @@ function ConfigPanel({ config }: { config: ClientConfig }) {
   const configPath = hasMultiOS
     ? config.configPaths[selectedOS] ?? Object.values(config.configPaths)[0]
     : config.configPaths["all"];
+
+  const openCommand = configPath
+    ? getOpenCommand(configPath, hasMultiOS ? selectedOS : "all")
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -94,6 +109,17 @@ function ConfigPanel({ config }: { config: ClientConfig }) {
             {configPath}
           </code>
         </p>
+
+        {/* Open file command */}
+        {openCommand && (
+          <div className="mb-3 flex items-center gap-2 rounded-lg bg-[#171615] px-3 py-2">
+            <span className="font-mono text-[0.72rem] text-[#858585]">$</span>
+            <code className="flex-1 font-mono text-[0.75rem] text-[#E8E0D6]">
+              {openCommand}
+            </code>
+            <CopyButton text={openCommand} />
+          </div>
+        )}
 
         {/* Snippet */}
         <CodeBlock code={config.snippet} label={config.format.toUpperCase()} />
