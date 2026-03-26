@@ -50,7 +50,6 @@ export type PreviewSnapshot = {
 };
 
 const sections = [
-  { id: "mcp-output", label: "MCP Output" },
   { id: "foundations", label: "Foundations" },
   { id: "typography", label: "Typography" },
   { id: "icons", label: "Icons" },
@@ -140,7 +139,7 @@ function Surface({
   className?: string;
 }) {
   return (
-    <div className={`rounded-3xl border border-white/8 bg-[#111117]/88 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] md:p-8 ${className}`}>
+    <div className={`rounded-3xl border border-white/8 bg-black/50 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.35)] md:p-8 ${className}`}>
       {children}
     </div>
   );
@@ -193,23 +192,22 @@ export default function PreviewClient({
   const [selectedClient, setSelectedClient] = useState<typeof clients[number]>(clients[0]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#070A10] text-[#F0F0F3]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_34%),radial-gradient(circle_at_80%_20%,rgba(16,22,32,0.9),transparent_26%),linear-gradient(180deg,#070A10_0%,#090B12_42%,#070A10_100%)]" />
+    <div className="relative min-h-screen overflow-x-hidden bg-[#111111] text-[var(--foreground)]">
 
-      <header className="sticky top-0 z-30 border-b border-white/8 bg-[rgba(7,10,16,0.75)] backdrop-blur-xl">
+      <header className="sticky top-0 z-30 bg-[#111111]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-6">
           <div>
-            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-[#858585]">Capy Preview</p>
-            <h1 className="mt-2 font-display text-[1.35rem] leading-none text-[#F0F0F3] md:text-[1.7rem]">
+            <p className="text-[0.72rem] uppercase tracking-[0.24em] text-[var(--muted)]">Capy Preview</p>
+            <h1 className="mt-2 font-display text-[1.35rem] leading-none text-[var(--foreground)] md:text-[1.7rem]">
               Clean system surface for the current site
             </h1>
           </div>
-          <nav className="hidden flex-wrap justify-end gap-2 lg:flex">
+          <nav className="hidden flex-wrap justify-end gap-5 lg:flex">
             {sections.map((section) => (
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="rounded-full border border-white/8 px-3 py-1.5 text-[0.78rem] text-[#858585] transition-colors hover:text-[#F0F0F3]"
+                className="text-[0.88rem] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
               >
                 {section.label}
               </a>

@@ -68,17 +68,17 @@ function buildDesignGuidance() {
             "Optional left sidebar or top navigation for section jumping.",
         ],
         whitespace: [
-            "Section gap: 5–6rem.",
-            "Sub-section gap: 2.5–3rem.",
-            "Specimen gap: 1–1.5rem.",
-            "Container padding: 1.5–2rem.",
+            "Section gap: 10-14rem between major sections.",
+            "Sub-section gap: 2.5-3rem.",
+            "Specimen gap: 1-1.5rem.",
+            "Container padding: 1.5-2rem.",
             "Use spacing instead of borders to define structure.",
         ],
         typography: [
-            "Section titles: 1.6–1.75rem / 600–700.",
-            "Sub-headings: 1rem–1.125rem / 500–600.",
+            "Section titles: 1.6-1.75rem / 600-700.",
+            "Sub-headings: 1rem-1.125rem / 500-600.",
             "Labels: 0.75rem monospace.",
-            "Body: 0.9rem / 1.5–1.6.",
+            "Body: 0.9rem / 1.5-1.6.",
         ],
         surfaces: [
             "Avoid default borders on containers.",
@@ -87,7 +87,7 @@ function buildDesignGuidance() {
             "Light mode base: #ffffff, elevated: #f5f5f5.",
         ],
         color: [
-            "Swatches: 64–80px squares with 8–10px radius.",
+            "Swatches: 64-80px squares with 8-10px radius.",
             "Responsive auto-fill grid.",
             "Group by semantic role (background, foreground, primary, muted).",
             "Show hex (6-char) in monospace + click-to-copy.",
@@ -96,7 +96,7 @@ function buildDesignGuidance() {
         specimens: [
             "Render components at natural size.",
             "Use subtle background surfaces instead of bordered cards.",
-            "Icons: grid with 40–48px cells.",
+            "Icons: grid with 40-48px cells.",
             "Limit initial items to ~12, add 'Show all' toggle.",
         ],
         theming: [
@@ -228,5 +228,5 @@ function buildInstructions(projectFacts, input) {
         ? "Update the existing /preview route incrementally."
         : "Create the /preview route from scratch.";
     const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
-    return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for card styles, typography, and specimen rendering patterns. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
+    return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for card styles, typography, and specimen rendering patterns. Specifically, leave 10rem to 14rem of vertical space between major sections so section endings and the next section heading are clearly separated. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }
