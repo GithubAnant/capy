@@ -5,7 +5,6 @@ const SECTION_ORDER = [
     "Colors",
     "Icons",
     "Typography",
-    "Spacing",
     "Inputs",
     "Actions",
     "Navigation",
@@ -62,13 +61,60 @@ export async function buildPreviewBrief(projectRoot, input) {
 }
 function buildDesignGuidance() {
     return {
-        pageStructure: ["Sticky frosted-glass header (backdrop-filter:blur(12px)), max-width:960px content column, anchor IDs on headings with scroll-margin-top:5rem."],
-        whitespace: ["Section gap:6rem, sub-section gap:3rem, specimen gap:1.5rem, container padding:2rem."],
-        typography: ["Section titles 1.75rem/700, sub-headings 1.125rem/600 uppercase, labels 0.75rem monospace, body 0.875rem/1.6."],
-        cards: ["12px radius, 1px border rgba(0,0,0,0.10), background #fafafa, shadow 0 1px 3px rgba(0,0,0,0.04), inner gap:1.5rem."],
-        color: ["80×80px swatches (radius 10px) in auto-fill grid, grouped by role, inset shadow on light swatches, monospace hex label + click-to-copy."],
-        specimens: ["Components at natural size in padded cards, icon grid 48×48px cells, 'Show all N' toggle after 12 items."],
-        responsive: ["Below 768px: single-column, 4rem section gap, 1rem padding. Below 640px: collapsible nav. Horizontal rows: overflow-x:auto + scroll-snap."],
+        pageStructure: [
+            "Sticky header with subtle backdrop blur (backdrop-filter: blur(10–12px)).",
+            "Max-width content column ~960px centered.",
+            "Anchor IDs on headings with scroll-margin-top:5rem.",
+            "Optional left sidebar or top navigation for section jumping.",
+        ],
+        whitespace: [
+            "Section gap: 5–6rem.",
+            "Sub-section gap: 2.5–3rem.",
+            "Specimen gap: 1–1.5rem.",
+            "Container padding: 1.5–2rem.",
+            "Use spacing instead of borders to define structure.",
+        ],
+        typography: [
+            "Section titles: 1.6–1.75rem / 600–700.",
+            "Sub-headings: 1rem–1.125rem / 500–600.",
+            "Labels: 0.75rem monospace.",
+            "Body: 0.9rem / 1.5–1.6.",
+        ],
+        surfaces: [
+            "Avoid default borders on containers.",
+            "Use at most 2 surface levels (base + subtle elevated background).",
+            "Dark mode base: #070a10, elevated: #0c1118.",
+            "Light mode base: #ffffff, elevated: #f5f5f5.",
+        ],
+        color: [
+            "Swatches: 64–80px squares with 8–10px radius.",
+            "Responsive auto-fill grid.",
+            "Group by semantic role (background, foreground, primary, muted).",
+            "Show hex (6-char) in monospace + click-to-copy.",
+            "Ensure contrast works in both themes.",
+        ],
+        specimens: [
+            "Render components at natural size.",
+            "Use subtle background surfaces instead of bordered cards.",
+            "Icons: grid with 40–48px cells.",
+            "Limit initial items to ~12, add 'Show all' toggle.",
+        ],
+        theming: [
+            "Support dark and light modes via root class or data attribute.",
+            "Add visible toggle in header.",
+            "Persist theme in localStorage.",
+            "Default to prefers-color-scheme.",
+        ],
+        interaction: [
+            "Color swatches clickable with pointer cursor.",
+            "Provide copy feedback (toast or temporary label change).",
+            "Hover states subtle (opacity/background shift).",
+        ],
+        responsive: [
+            "Below 768px: single column, reduced spacing (~4rem sections).",
+            "Below 640px: collapsible nav.",
+            "Horizontal rows: overflow-x auto.",
+        ],
     };
 }
 function buildInspectionPlan(projectFacts) {
@@ -96,27 +142,38 @@ function buildInspectionPlan(projectFacts) {
         {
             step: 1,
             action: "Read the app shell and routing entry points first",
-            targets: uniqueShellTargets.length > 0 ? uniqueShellTargets : projectFacts.likelyPageDirs,
+            targets: uniqueShellTargets.length > 0
+                ? uniqueShellTargets
+                : projectFacts.likelyPageDirs,
             reason: "Understand the project structure, routing style, and baseline visual language.",
         },
         {
             step: 2,
             action: "Read global styles and theme sources",
             targets: projectFacts.likelyStyleFiles.slice(0, 8),
-            reason: "Extract colors, spacing, typography, layout rules, and theme conventions from the real repo.",
+            reason: "Extract colors, typography, layout rules, and theme conventions from the real repo.",
         },
         {
             step: 3,
             action: "Discover component files manually in the repository",
             targets: projectFacts.likelyComponentDirs.length > 0
                 ? projectFacts.likelyComponentDirs
-                : ["src/components", "components", "src/ui", "ui", "src/features", "features"],
+                : [
+                    "src/components",
+                    "components",
+                    "src/ui",
+                    "ui",
+                    "src/features",
+                    "features",
+                ],
             reason: "The agent should discover component candidates directly in the repo and validate each with real usage before adding preview specimens.",
         },
         {
             step: 4,
             action: "Trace real usage paths for discovered components",
-            targets: projectFacts.likelyPageDirs.length > 0 ? projectFacts.likelyPageDirs : ["src/app", "src/pages", "app", "pages"],
+            targets: projectFacts.likelyPageDirs.length > 0
+                ? projectFacts.likelyPageDirs
+                : ["src/app", "src/pages", "app", "pages"],
             reason: "For each component family, trace at least one real usage flow from route/page files so preview examples mirror real behavior.",
         },
         {
@@ -129,18 +186,12 @@ function buildInspectionPlan(projectFacts) {
 }
 function buildConstraints(framework) {
     const constraints = [
-        "Do not invent colors, spacing, typography, or component APIs before inspecting the repo files listed in inspection_plan.",
-        "Build a preview page that can support both vertical and horizontal scanning where useful.",
-        "Use horizontal specimen rows only when they make scanning easier.",
-        "Prefer existing components over creating preview-only components.",
-        "Do component discovery manually in-repo before marking a preview section complete.",
-        "Treat files with PascalCase exports as candidates, then validate them by reading real usage examples.",
-        "When you only find hooks, providers, or usage patterns, trace one real usage example and mirror that flow in /preview instead of inventing a fake component.",
-        "If a component family is not present in the repo, label it as absent rather than fabricating a preview-only substitute.",
-        "Keep the page neat, easy to scan, and aligned with the app's current design language.",
-        "Include an icon inventory when the repo exposes app icons clearly enough to catalogue them.",
-        "Show colors in a uniform swatch format with normalized 6-character hex labels and click-to-copy affordance.",
-        "Follow the concrete CSS values in deliverable_spec.design_guidance for spacing, cards, typography, color swatches, and responsive breakpoints. Use the project's own design language where it overrides those defaults.",
+        "Inspect repo first; do not invent colors, typography, or component APIs.",
+        "Prefer real components and validate them through actual usage in pages/routes.",
+        "Mirror real usage flows when only hooks/providers exist instead of fabricating UI.",
+        "Keep the preview clean, scannable, and aligned with the app’s design language.",
+        "Do component discovery manually in-repo — traverse component directories and validate with real usage before showcasing.",
+        "Follow design_guidance for layout, spacing, theming, and responsiveness without overusing bordered containers.",
     ];
     if (framework.needsConfirmation && framework.confirmationMessage) {
         constraints.push(framework.confirmationMessage);
@@ -177,5 +228,5 @@ function buildInstructions(projectFacts, input) {
         ? "Update the existing /preview route incrementally."
         : "Create the /preview route from scratch.";
     const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
-    return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for exact spacing, card styles, typography, and specimen rendering patterns. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
+    return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for card styles, typography, and specimen rendering patterns. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }

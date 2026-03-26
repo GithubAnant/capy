@@ -31,9 +31,11 @@ export interface DesignGuidance {
     pageStructure: string[];
     whitespace: string[];
     typography: string[];
-    cards: string[];
     color: string[];
+    surfaces: string[];
+    theming: string[];
     specimens: string[];
+    interaction: string[];
     responsive: string[];
 }
 export interface DeliverableSpec {

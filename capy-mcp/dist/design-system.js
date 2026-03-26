@@ -138,7 +138,7 @@ function classifyCssVariable(name) {
     if (/(font|type|text|leading|tracking|heading|body)/i.test(name)) {
         return "typography";
     }
-    if (/(space|spacing|gap|radius|shadow|size|width|height)/i.test(name)) {
+    if (/(gap|radius|shadow|size|width|height)/i.test(name)) {
         return "layout";
     }
     return "other";
