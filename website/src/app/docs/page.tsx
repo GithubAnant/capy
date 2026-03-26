@@ -8,8 +8,7 @@ import { CopyButton } from "@/components/CopyButton";
 import { clients } from "@/lib/clients";
 import { getClientConfig, type ClientConfig } from "@/lib/client-configs";
 
-/** Clients that appear on the docs page (everything except Conductor) */
-const docsClients = clients.filter((c) => c.name !== "Conductor");
+const docsClients = clients;
 
 const osOptions = ["macOS", "Windows", "Linux"] as const;
 type OS = (typeof osOptions)[number];
@@ -111,7 +110,7 @@ function ConfigPanel({ config }: { config: ClientConfig }) {
 }
 
 export default function DocsPage() {
-  const [selectedName, setSelectedName] = useState(docsClients[0].name);
+  const [selectedName, setSelectedName] = useState<string>(docsClients[0].name);
   const config = getClientConfig(selectedName);
 
   return (

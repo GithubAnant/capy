@@ -149,10 +149,12 @@ args = ["-y", "capy-mcp@latest"]`,
   {
     name: "Antigravity",
     configPaths: {
-      all: "~/.gemini/antigravity/mcp_config.json",
+      macOS: "~/.gemini/antigravity/mcp_config.json",
+      Windows: "%USERPROFILE%\\.gemini\\antigravity\\mcp_config.json",
     },
     snippet: stdioViaNpxJson,
     format: "json",
+    note: "Or via UI: Agent session → … dropdown → MCP Servers → Manage MCP Servers → View raw config.",
   },
   {
     name: "VS Code",
@@ -183,13 +185,13 @@ args = ["-y", "capy-mcp@latest"]`,
   {
     name: "Zed",
     configPaths: {
-      macOS: "~/.config/zed/settings.json",
+      macOS: "~/.zed/settings.json",
       Linux: "~/.config/zed/settings.json",
+      Windows: "%USERPROFILE%\\AppData\\Roaming\\Zed\\settings.json",
     },
     snippet: `{
   "context_servers": {
     "capy": {
-      "source": "custom",
       "command": "npx",
       "args": ["-y", "capy-mcp@latest"],
       "env": {}
@@ -197,7 +199,6 @@ args = ["-y", "capy-mcp@latest"]`,
   }
 }`,
     format: "json",
-    note: 'The "source": "custom" field is required.',
   },
 ];
 

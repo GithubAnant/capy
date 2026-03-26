@@ -5,44 +5,109 @@ import { CopyButton } from "@/components/CopyButton";
 import { ClientPicker } from "@/components/ClientPicker";
 
 import { clients, type Client } from "@/lib/clients";
-import { getClientConfig } from "@/lib/client-configs";
+import { getClientConfig, type ClientConfig } from "@/lib/client-configs";
 
-function getConfig(client: Client) {
-  const config = getClientConfig(client.name);
-  if (config) {
-    const defaultPath = config.configPaths["all"] || config.configPaths["macOS"] || "settings.json";
-    return {
-      file: defaultPath,
-      code: config.snippet
-    };
-  }
-  
-  // Default MCP config for other clients
-  return {
-    file: "mcp_config.json",
-    code: `{
-  "mcpServers": {
-    "capy": {
-      "command": "npx",
-      "args": ["-y", "capy-mcp@latest"]
-    }
-  }
-}`,
-  };
+const osOptions = ["macOS", "Windows", "Linux"] as const;
+type OS = (typeof osOptions)[number];
+
+function CodeBlock({ code, label }: { code: string; label?: string }) {
+  return (
+    <div className="overflow-hidden rounded-lg bg-[#171615]">
+      {label && (
+        <div className="border-b border-white/5 px-4 py-2">
+          <span className="font-mono text-[0.72rem] text-[#858585]">{label}</span>
+        </div>
+      )}
+      <div className="relative px-4 py-3">
+        <pre className="overflow-x-auto text-[0.8rem] leading-relaxed text-[#E8E0D6]">
+          <code>{code}</code>
+        </pre>
+        <div className="absolute right-3 top-3">
+          <CopyButton text={code} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfigPanel({ config }: { config: ClientConfig }) {
+  const pathKeys = Object.keys(config.configPaths);
+  const hasMultiOS = pathKeys.length > 1 || !pathKeys.includes("all");
+
+  const availableOS = hasMultiOS
+    ? osOptions.filter((os) => os in config.configPaths)
+    : [];
+
+  const [selectedOS, setSelectedOS] = useState<OS>(availableOS[0] ?? "macOS");
+
+  const configPath = hasMultiOS
+    ? config.configPaths[selectedOS] ?? Object.values(config.configPaths)[0]
+    : config.configPaths["all"];
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* CLI one-liner */}
+      {config.cli && (
+        <div>
+          <h3 className="mb-2 text-[0.85rem] font-medium text-[#F0F0F3]">Quick setup</h3>
+          <p className="mb-3 text-[0.8rem] text-[#858585]">
+            Run this single command to add Capy globally:
+          </p>
+          <CodeBlock code={config.cli} />
+        </div>
+      )}
+
+      {/* Config file */}
+      <div>
+        <h3 className="mb-2 text-[0.85rem] font-medium text-[#F0F0F3]">
+          {config.cli ? "Or add manually" : "Config file"}
+        </h3>
+
+        {/* OS tabs */}
+        {availableOS.length > 1 && (
+          <div className="mb-3 inline-flex rounded-md bg-[#171615] p-0.5">
+            {availableOS.map((os) => (
+              <button
+                key={os}
+                type="button"
+                onClick={() => setSelectedOS(os)}
+                className={`cursor-pointer rounded-md px-3 py-1.5 font-mono text-[0.72rem] font-medium transition-colors ${
+                  selectedOS === os
+                    ? "bg-white text-black"
+                    : "text-[#858585] hover:text-[#F0F0F3]"
+                }`}
+              >
+                {os}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* File path */}
+        <p className="mb-3 text-[0.8rem] text-[#858585]">
+          Add to{" "}
+          <code className="rounded bg-[#171615] px-1.5 py-0.5 font-mono text-[0.75rem] text-[#E8E0D6]">
+            {configPath}
+          </code>
+        </p>
+
+        {/* Snippet */}
+        <CodeBlock code={config.snippet} label={config.format.toUpperCase()} />
+      </div>
+
+      {/* Note */}
+      {config.note && (
+        <p className="text-[0.8rem] leading-relaxed text-[#858585]">
+          {config.note}
+        </p>
+      )}
+    </div>
+  );
 }
 
 export default function SetupSection() {
   const [selected, setSelected] = useState<Client>(clients[0]);
-
-  const config = getConfig(selected);
-
-  const steps = [
-    {
-      title: "Configure " + selected.name,
-      command: `// ${config.file}\n${config.code}`,
-      description: `Add the MCP config to ${selected.name}. Capy runs locally via npx — no global install needed.`,
-    },
-  ];
+  const config = getClientConfig(selected.name);
 
   return (
     <section id="setup">
@@ -55,46 +120,15 @@ export default function SetupSection() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Client picker */}
           <ClientPicker selected={selected} onSelect={setSelected} />
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col gap-0">
-        {steps.map((step, i) => (
-          <div key={step.title} className="flex gap-5">
-            {/* Left: step number + vertical line */}
-            <div className="flex flex-col items-center">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#171615] font-mono text-[0.75rem] font-medium text-[#F0F0F3]">
-                {i + 1}
-              </span>
-              {i < steps.length - 1 && (
-                <div className="w-px flex-1 bg-white/10" />
-              )}
-            </div>
-
-            {/* Right: content */}
-            <div className={`pb-10 ${i === steps.length - 1 ? "pb-0" : ""}`}>
-              <h3 className="mt-1 text-[1.05rem] font-medium text-[#F0F0F3]">
-                {step.title}
-              </h3>
-              <p className="mt-1.5 text-[0.82rem] leading-[1.6] text-[#858585]">
-                {step.description}
-              </p>
-              <div className="mt-3 overflow-hidden rounded-lg bg-[#171615]">
-                <div className="relative px-4 py-3">
-                  <pre className="overflow-x-auto text-[0.8rem] leading-relaxed text-[#E8E0D6]">
-                    <code>{step.command}</code>
-                  </pre>
-                  <div className="absolute right-3 top-3">
-                    <CopyButton text={step.command} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {config && (
+        <div className="mt-10 rounded-xl border border-white/5 bg-[#0A0A09] p-6 md:p-8">
+          <ConfigPanel key={selected.name} config={config} />
+        </div>
+      )}
     </section>
   );
 }
