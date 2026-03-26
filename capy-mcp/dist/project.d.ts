@@ -6,4 +6,6 @@ import type { FrameworkInfo, ProjectFacts } from "./types.js";
  * Strategy: glob for all source files, read their exports, then classify
  * directories by what they contain rather than what they're named.
  */
-export declare function buildProjectFacts(projectRoot: string, framework: FrameworkInfo): Promise<ProjectFacts>;
+export declare function buildProjectFacts(projectRoot: string, framework: FrameworkInfo, options?: {
+    discoverComponents?: boolean;
+}): Promise<ProjectFacts>;

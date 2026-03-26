@@ -143,10 +143,10 @@ test("buildPreviewBrief instructs the agent to search for real component familie
   try {
     const brief = await buildPreviewBrief(projectRoot, { task: "build_preview" });
 
-    assert.equal(brief.inspectionPlan[2].action, "Traverse discovered component directories");
-    assert.ok(brief.inspectionPlan[2].targets.some(t => t.includes("Button")));
-    assert.match(brief.instructions, /traverse all discovered component directories/i);
-    assert.match(brief.constraints.join("\n"), /Traverse all component directories found by Capy/i);
+    assert.equal(brief.inspectionPlan[2].action, "Discover component files manually in the repository");
+    assert.ok(brief.inspectionPlan[2].targets.some((t) => t.includes("components")));
+    assert.match(brief.instructions, /discover component candidates manually/i);
+    assert.match(brief.constraints.join("\n"), /Do component discovery manually in-repo/i);
   } finally {
     await cleanup(projectRoot);
   }

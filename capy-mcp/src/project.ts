@@ -12,7 +12,10 @@ import type { FrameworkInfo, ProjectFacts } from "./types.js";
  */
 export async function buildProjectFacts(
   projectRoot: string,
-  framework: FrameworkInfo
+  framework: FrameworkInfo,
+  options: {
+    discoverComponents?: boolean;
+  } = {}
 ): Promise<ProjectFacts> {
   const sourceFiles = await glob(["**/*.{ts,tsx,js,jsx}"], {
     cwd: projectRoot,
@@ -40,7 +43,9 @@ export async function buildProjectFacts(
 
   // Scan files for PascalCase exports to find component directories
   // Exclude page dirs so route files don't inflate the component list
-  const componentDirs = await findComponentDirs(projectRoot, normalized, pageDirs);
+  const componentDirs = options.discoverComponents === false
+    ? []
+    : await findComponentDirs(projectRoot, normalized, pageDirs);
 
   // Find style files — already dynamic via glob
   const styleFiles = await findStyleFiles(projectRoot);

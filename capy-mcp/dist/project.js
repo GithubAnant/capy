@@ -8,7 +8,7 @@ import { readText, toPosixPath } from "./files.js";
  * Strategy: glob for all source files, read their exports, then classify
  * directories by what they contain rather than what they're named.
  */
-export async function buildProjectFacts(projectRoot, framework) {
+export async function buildProjectFacts(projectRoot, framework, options = {}) {
     const sourceFiles = await glob(["**/*.{ts,tsx,js,jsx}"], {
         cwd: projectRoot,
         nodir: true,
@@ -32,7 +32,9 @@ export async function buildProjectFacts(projectRoot, framework) {
     const pageDirs = findPageDirs(normalized);
     // Scan files for PascalCase exports to find component directories
     // Exclude page dirs so route files don't inflate the component list
-    const componentDirs = await findComponentDirs(projectRoot, normalized, pageDirs);
+    const componentDirs = options.discoverComponents === false
+        ? []
+        : await findComponentDirs(projectRoot, normalized, pageDirs);
     // Find style files — already dynamic via glob
     const styleFiles = await findStyleFiles(projectRoot);
     // UI dirs = component dirs only (page dirs are routes, not reusable UI)

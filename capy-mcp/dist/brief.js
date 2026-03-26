@@ -1,6 +1,5 @@
 import { detectFramework } from "./framework.js";
 import { buildProjectFacts } from "./project.js";
-import { buildComponentDiscoveryPlan } from "./component-discovery.js";
 const SECTION_ORDER = [
     "Foundations",
     "Colors",
@@ -18,12 +17,13 @@ const SECTION_ORDER = [
 ];
 export async function buildPreviewBrief(projectRoot, input) {
     const framework = await detectFramework(projectRoot);
-    const projectFacts = await buildProjectFacts(projectRoot, framework);
-    const discoveryPlan = await buildComponentDiscoveryPlan(projectRoot, projectFacts);
-    const warnings = buildWarnings(framework, input.changedFiles, discoveryPlan.missingFamilyGaps);
+    const projectFacts = await buildProjectFacts(projectRoot, framework, {
+        discoverComponents: true,
+    });
+    const warnings = buildWarnings(framework, input.changedFiles);
     return {
         projectFacts,
-        inspectionPlan: buildInspectionPlan(projectFacts, discoveryPlan),
+        inspectionPlan: buildInspectionPlan(projectFacts),
         constraints: buildConstraints(framework),
         deliverableSpec: {
             goal: input.task === "update_preview"
@@ -57,7 +57,7 @@ export async function buildPreviewBrief(projectRoot, input) {
         },
         updateStrategy: buildUpdateStrategy(input.changedFiles),
         warnings,
-        instructions: buildInstructions(projectFacts, input, discoveryPlan.instruction),
+        instructions: buildInstructions(projectFacts, input),
     };
 }
 function buildDesignGuidance() {
@@ -71,7 +71,7 @@ function buildDesignGuidance() {
         responsive: ["Below 768px: single-column, 4rem section gap, 1rem padding. Below 640px: collapsible nav. Horizontal rows: overflow-x:auto + scroll-snap."],
     };
 }
-function buildInspectionPlan(projectFacts, discoveryPlan) {
+function buildInspectionPlan(projectFacts) {
     // Build app shell targets dynamically from discovered page dirs
     // Use routing style to suggest the right shell files
     const appShellTargets = [];
@@ -107,17 +107,17 @@ function buildInspectionPlan(projectFacts, discoveryPlan) {
         },
         {
             step: 3,
-            action: "Traverse discovered component directories",
-            targets: discoveryPlan.prioritizedFiles.length > 0
-                ? discoveryPlan.prioritizedFiles
-                : projectFacts.likelyComponentDirs,
-            reason: "Read the actual components discovered by Capy's scan. These are real files with PascalCase exports, not guesses.",
+            action: "Discover component files manually in the repository",
+            targets: projectFacts.likelyComponentDirs.length > 0
+                ? projectFacts.likelyComponentDirs
+                : ["src/components", "components", "src/ui", "ui", "src/features", "features"],
+            reason: "The agent should discover component candidates directly in the repo and validate each with real usage before adding preview specimens.",
         },
         {
             step: 4,
-            action: "Inspect UI/component directories for anything the scan missed",
-            targets: projectFacts.likelyComponentDirs.length > 0 ? projectFacts.likelyComponentDirs : projectFacts.likelyUiDirs,
-            reason: "The automatic scan catches most components, but manually inspect directories for any non-standard patterns that were missed.",
+            action: "Trace real usage paths for discovered components",
+            targets: projectFacts.likelyPageDirs.length > 0 ? projectFacts.likelyPageDirs : ["src/app", "src/pages", "app", "pages"],
+            reason: "For each component family, trace at least one real usage flow from route/page files so preview examples mirror real behavior.",
         },
         {
             step: 5,
@@ -133,7 +133,8 @@ function buildConstraints(framework) {
         "Build a preview page that can support both vertical and horizontal scanning where useful.",
         "Use horizontal specimen rows only when they make scanning easier.",
         "Prefer existing components over creating preview-only components.",
-        "Traverse all component directories found by Capy. Every file with a PascalCase export is a component candidate. Read real usage examples before marking a preview section complete.",
+        "Do component discovery manually in-repo before marking a preview section complete.",
+        "Treat files with PascalCase exports as candidates, then validate them by reading real usage examples.",
         "When you only find hooks, providers, or usage patterns, trace one real usage example and mirror that flow in /preview instead of inventing a fake component.",
         "If a component family is not present in the repo, label it as absent rather than fabricating a preview-only substitute.",
         "Keep the page neat, easy to scan, and aligned with the app's current design language.",
@@ -160,7 +161,7 @@ function buildUpdateStrategy(changedFiles) {
     }
     return strategies;
 }
-function buildWarnings(framework, changedFiles, discoveryGaps = []) {
+function buildWarnings(framework, changedFiles) {
     const warnings = [];
     if (framework.confirmationMessage) {
         warnings.push(framework.confirmationMessage);
@@ -168,14 +169,13 @@ function buildWarnings(framework, changedFiles, discoveryGaps = []) {
     if (!changedFiles || changedFiles.length === 0) {
         warnings.push("No changedFiles were provided. The agent should inspect git diff or recent edits when performing update_preview.");
     }
-    warnings.push(...discoveryGaps);
     warnings.push("IMPORTANT: Add .capy/ and the created preview route/page files (e.g. app/preview/, pages/preview.tsx) to .gitignore so they are not committed to the repository.");
     return warnings;
 }
-function buildInstructions(projectFacts, input, discoveryInstruction) {
+function buildInstructions(projectFacts, input) {
     const lead = input.task === "update_preview"
         ? "Update the existing /preview route incrementally."
         : "Create the /preview route from scratch.";
     const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
-    return `${lead}${userGoal} Read the app shell first, then global styles, then traverse all discovered component directories. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for exact spacing, card styles, typography, and specimen rendering patterns. ${discoveryInstruction} IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
+    return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for exact spacing, card styles, typography, and specimen rendering patterns. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }
