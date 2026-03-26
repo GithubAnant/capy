@@ -50,7 +50,7 @@ export default function Navbar() {
     <header className="fixed left-0 top-0 z-40 w-full bg-black">
       <div className="mx-auto flex h-14 w-full max-w-270 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-1.5 font-display text-[1.15rem] leading-none text-[#F0F0F3]">
-          <Image src="/capy.svg" alt="capy" width={18} height={18} className="relative top-[2px] h-[1.15rem] w-[1.15rem]" />
+          <Image src="/capy.svg" alt="capy" width={18} height={18} className="relative top-0.5 h-[1.15rem] w-[1.15rem]" />
           capy
         </Link>
 
