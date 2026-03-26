@@ -45,7 +45,7 @@ export const clientConfigs: ClientConfig[] = [
   },
   {
     name: "Claude Code",
-    cli: "claude mcp add capy -- npx -y capy-mcp@latest",
+    cli: "claude mcp add --scope user capy -- npx -y capy-mcp@latest",
     configPaths: {
       all: "~/.claude/mcp.json",
     },
