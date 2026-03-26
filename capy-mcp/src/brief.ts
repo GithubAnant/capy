@@ -88,18 +88,18 @@ function buildDesignGuidance(): DesignGuidance {
     ],
 
     whitespace: [
-      "Section gap: 10–14rem between major sections.",
-      "Sub-section gap: 2.5–3rem.",
-      "Specimen gap: 1–1.5rem.",
-      "Container padding: 1.5–2rem.",
+      "Section gap: 10-14rem between major sections.",
+      "Sub-section gap: 2.5-3rem.",
+      "Specimen gap: 1-1.5rem.",
+      "Container padding: 1.5-2rem.",
       "Use spacing instead of borders to define structure.",
     ],
 
     typography: [
-      "Section titles: 1.6–1.75rem / 600–700.",
-      "Sub-headings: 1rem–1.125rem / 500–600.",
+      "Section titles: 1.6-1.75rem / 600-700.",
+      "Sub-headings: 1rem-1.125rem / 500-600.",
       "Labels: 0.75rem monospace.",
-      "Body: 0.9rem / 1.5–1.6.",
+      "Body: 0.9rem / 1.5-1.6.",
     ],
 
     surfaces: [
@@ -110,7 +110,7 @@ function buildDesignGuidance(): DesignGuidance {
     ],
 
     color: [
-      "Swatches: 64–80px squares with 8–10px radius.",
+      "Swatches: 64-80px squares with 8-10px radius.",
       "Responsive auto-fill grid.",
       "Group by semantic role (background, foreground, primary, muted).",
       "Show hex (6-char) in monospace + click-to-copy.",
@@ -120,7 +120,7 @@ function buildDesignGuidance(): DesignGuidance {
     specimens: [
       "Render components at natural size.",
       "Use subtle background surfaces instead of bordered cards.",
-      "Icons: grid with 40–48px cells.",
+      "Icons: grid with 40-48px cells.",
       "Limit initial items to ~12, add 'Show all' toggle.",
     ],
 
