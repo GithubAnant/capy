@@ -88,7 +88,7 @@ function buildDesignGuidance(): DesignGuidance {
     ],
 
     whitespace: [
-      "Section gap: 5–6rem.",
+      "Section gap: 10–14rem between major sections.",
       "Sub-section gap: 2.5–3rem.",
       "Specimen gap: 1–1.5rem.",
       "Container padding: 1.5–2rem.",
@@ -291,5 +291,5 @@ function buildInstructions(
 
   const userGoal = input.userGoal ? ` User goal: ${input.userGoal}.` : "";
 
-  return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for card styles, typography, and specimen rendering patterns. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
+  return `${lead}${userGoal} Read the app shell first, then global styles, then discover component candidates manually by traversing component/UI directories and validating real usage from route/page files. After that, implement ${projectFacts.previewEntryFile} as a clean preview surface that supports both vertical and horizontal scanning when useful, includes a dedicated icon section when icons can be discovered, and renders colors as consistent swatches with 6-character hex labels plus click-to-copy behavior using a pointer cursor. Follow the design_guidance specifications in deliverable_spec for card styles, typography, and specimen rendering patterns. Specifically, leave 10rem to 14rem of vertical space between major sections so section endings and the next section heading are clearly separated. IMPORTANT: After creating files, add the .capy/ folder and the created preview page files (e.g. ${projectFacts.previewEntryFile}) to .gitignore so they are not committed to the repository.`;
 }
