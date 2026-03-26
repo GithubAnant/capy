@@ -1,9 +1,8 @@
 "use client";
 
+import DocsNavbar from "@/components/layout/DocsNavbar";
 import { useState } from "react";
 import Image from "next/image";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { CopyButton } from "@/components/CopyButton";
 import { clients } from "@/lib/clients";
 import { getClientConfig, type ClientConfig } from "@/lib/client-configs";
@@ -158,9 +157,9 @@ export default function DocsPage() {
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-black">
-      <Navbar />
+      <DocsNavbar />
 
-      <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col px-4 pb-20 pt-28 md:px-6">
+      <main className="relative z-10 mx-auto flex w-full max-w-270 flex-col px-4 pb-20 pt-14 md:px-6">
         <p className="mb-3 text-[0.78rem] text-[#858585]">{"// Documentation"}</p>
         <h1 className="font-display text-[1.85rem] font-medium leading-[1.04] text-[#F0F0F3] md:text-[3.15rem]">
           Global MCP Config
@@ -219,10 +218,6 @@ export default function DocsPage() {
           </div>
         )}
       </main>
-
-      <div className="mx-auto w-full max-w-270 px-4 pb-10 md:px-6">
-        <Footer />
-      </div>
     </div>
   );
 }

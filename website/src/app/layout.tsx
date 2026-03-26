@@ -23,7 +23,7 @@ const siteUrl = "https://capy.anants.studio";
 
 export const metadata: Metadata = {
   title: {
-    default: "Capy — The AI-Native Code Editor",
+    default: "Capy",
     template: "%s | Capy",
   },
   description:

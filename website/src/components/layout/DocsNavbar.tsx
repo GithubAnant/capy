@@ -1,23 +1,13 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const navItems = [
-  { label: "Features", href: "features" },
-  { label: "Setup", href: "setup" },
-  { label: "Pricing", href: "pricing" },
-  { label: "Docs", href: "/docs", isRoute: true },
-];
 
 function formatStars(count: number): string {
   if (count >= 1000) return `${(count / 1000).toFixed(count >= 10000 ? 0 : 1)}K`;
   return String(count);
 }
 
-export default function Navbar() {
+export default function DocsNavbar() {
   const [stars, setStars] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,45 +21,13 @@ export default function Navbar() {
       .catch(() => {});
   }, []);
 
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const scrollTo = (id: string) => {
-    if (pathname !== "/") {
-      router.push(`/#${id}`);
-      return;
-    }
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-      history.replaceState(null, "", window.location.pathname);
-    }
-  };
-
   return (
     <header className="fixed left-0 top-0 z-40 w-full bg-black">
       <div className="mx-auto flex h-14 w-full max-w-270 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-1.5 font-display text-[1.15rem] leading-none text-[#F0F0F3]">
-          <Image src="/capy.svg" alt="capy" width={18} height={18} className="relative top-[2px] h-[1.15rem] w-[1.15rem]" />
+          <Image src="/capy.svg" alt="capy" width={18} height={18} className="relative top-0.5 h-[1.15rem] w-[1.15rem]" />
           capy
         </Link>
-
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 md:flex">
-          {navItems.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() =>
-                "isRoute" in item
-                  ? router.push(item.href)
-                  : scrollTo(item.href)
-              }
-              className="cursor-pointer text-[0.88rem] font-normal text-[#858585] hover:text-[#F0F0F3]"
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
 
         <a
           href="https://github.com/GithubAnant/capy"

@@ -1,5 +1,7 @@
+"use client";
+
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Features", href: "features" },
@@ -9,16 +11,21 @@ const navLinks = [
   { label: "Privacy", href: "/privacy", isRoute: true },
 ];
 
-function scrollTo(id: string) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
-    history.replaceState(null, "", window.location.pathname);
-  }
-}
-
 export default function Footer() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const scrollTo = (id: string) => {
+    if (pathname !== "/") {
+      router.push(`/#${id}`);
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+      history.replaceState(null, "", window.location.pathname);
+    }
+  };
   return (
     <footer className="rounded-[1.3rem] bg-[#171615] px-10 pb-10 pt-12 md:px-14">
       <div className="flex flex-col justify-between gap-12 md:flex-row">
