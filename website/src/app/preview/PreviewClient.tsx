@@ -258,44 +258,6 @@ export default function PreviewClient({
 
         <section className="flex flex-col gap-8" style={{ marginTop: "14rem" }}>
           <SectionHeading
-            id="mcp-output"
-            eyebrow="Capy MCP"
-            title="Generated output driving this page"
-            description="This is the MCP snapshot available in the repo after running Capy. The preview reads from the design-system artifact at render time and uses the brief’s route contract."
-          />
-          <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <Surface>
-              <p className="font-mono text-[0.74rem] text-[#858585]">Discovered families</p>
-              <div className="mt-4 space-y-3">
-                {(snapshot?.scan?.discoveredFamilies ?? []).map((family) => (
-                  <div key={family} className="rounded-xl bg-white/3 px-4 py-3 text-[0.9rem] leading-[1.6] text-[#F0F0F3]">
-                    {family}
-                  </div>
-                ))}
-              </div>
-            </Surface>
-            <Surface>
-              <p className="font-mono text-[0.74rem] text-[#858585]">Key MCP fields</p>
-              <div className="mt-4 space-y-3 font-mono text-[0.78rem] text-[#E8E0D6]">
-                <div className="rounded-xl bg-[#171615] px-4 py-3">
-                  previewRoute: {snapshot?.repo?.previewRoute ?? "/preview"}
-                </div>
-                <div className="rounded-xl bg-[#171615] px-4 py-3">
-                  previewEntryFile: {snapshot?.repo?.previewEntryFile ?? "src/app/preview/page.tsx"}
-                </div>
-                <div className="rounded-xl bg-[#171615] px-4 py-3">
-                  routingStyle: {snapshot?.repo?.routingStyle ?? "app-router"}
-                </div>
-                <div className="rounded-xl bg-[#171615] px-4 py-3">
-                  cssVariables: {snapshot?.tokens?.cssVariables?.length ?? 0}
-                </div>
-              </div>
-            </Surface>
-          </div>
-        </section>
-
-        <section className="flex flex-col gap-8" style={{ marginTop: "14rem" }}>
-          <SectionHeading
             id="foundations"
             eyebrow="Foundations"
             title="Color system"
