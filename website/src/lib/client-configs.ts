@@ -79,7 +79,7 @@ args = ["-y", "capy-mcp@latest"]`,
   {
     name: "Copilot CLI",
     configPaths: {
-      all: "~/.vscode-server/data/User/mcp.json",
+      all: "~/.copilot/mcp-config.json",
     },
     snippet: `{
   "servers": {
