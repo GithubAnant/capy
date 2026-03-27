@@ -1,47 +1,18 @@
-import Image from "next/image";
 
 export default function HeroPreview() {
   return (
     <section className="pb-14">
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111117]">
+      <div className="overflow-hidden rounded-2xl bg-[#111117]">
         <div className="relative aspect-[16/8.6] w-full">
-          <Image
-            src="https://framerusercontent.com/images/gcAhWkaUK37e0Uq6M2443Ldm0EI.png?width=2912&height=1632"
-            alt="capy interface preview"
-            fill
-            className="object-cover"
-            priority
+          <video
+            src="/capy.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-black/36" />
-
-          <div className="absolute inset-x-[11.5%] bottom-[13%] top-[20%] overflow-hidden rounded-xl border border-white/15 bg-black/85">
-            <div className="flex h-6 items-center justify-between border-b border-white/10 px-2.5 text-[9px] text-[#babcc8]">
-              <span>Explorer</span>
-              <span>capy</span>
-              <span>Assistant</span>
-            </div>
-            <div className="grid h-[calc(100%-2rem)] grid-cols-[1.1fr_1fr]">
-              <div className="border-r border-white/10 p-2.5 text-[9px] text-[#80828f]">
-                <div className="space-y-1">
-                  <p>{'import { useState } from "react"'}</p>
-                  <p>{'import { capy } from "@/lib/capy"'}</p>
-                  <p className="pt-2">function AuthForm() {'{'}</p>
-                  <p>{'  const [email, setEmail] = useState("")'}</p>
-                  <p>{'  const [password, setPassword] = useState("")'}</p>
-                  <p className="pt-2">  return &lt;form /&gt;</p>
-                  <p>{'}'}</p>
-                </div>
-              </div>
-              <div className="p-2.5 text-[9px] text-[#9a9cab]">
-                <p className="text-[#cfd1dc]">capy AI assistant</p>
-                <p className="mt-2">Added secure auth flow with validation and onboarding hints.</p>
-                <div className="mt-2.5 rounded-md border border-white/12 bg-white/5 px-2 py-1 text-[#c8cad5]">
-                  Apply changes
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
