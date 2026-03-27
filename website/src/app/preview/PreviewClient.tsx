@@ -7,7 +7,6 @@ import { CopyButton } from "@/components/CopyButton";
 import { PricingFreeCard } from "@/components/PricingFreeCard";
 import { PricingWhyFreeCard } from "@/components/PricingWhyFreeCard";
 import FAQSection from "@/components/sections/FAQSection";
-import FeaturesSection from "@/components/sections/FeaturesSection";
 import HeroPreview from "@/components/sections/HeroPreview";
 import HeroSection from "@/components/sections/HeroSection";
 import SetupSection from "@/components/sections/SetupSection";
@@ -412,9 +411,6 @@ export default function PreviewClient({
             </Surface>
             <Surface className="overflow-hidden p-0">
               <HeroPreview />
-            </Surface>
-            <Surface>
-              <FeaturesSection />
             </Surface>
             <Surface>
               <SetupSection />

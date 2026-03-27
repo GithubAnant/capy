@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 
 const navLinks = [
-  { label: "Features", href: "features" },
   { label: "Pricing", href: "pricing" },
   { label: "Setup", href: "setup" },
   { label: "Docs", href: "/docs", isRoute: true },

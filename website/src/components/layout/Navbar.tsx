@@ -6,7 +6,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const navItems = [
-  { label: "Features", href: "features" },
   { label: "Setup", href: "setup" },
   { label: "Pricing", href: "pricing" },
   { label: "Docs", href: "/docs", isRoute: true },
