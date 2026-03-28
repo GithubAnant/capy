@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Capy",
   },
   description:
-    "The AI-native code editor that gets it exactly right. No approximation. No bloat. Just perfect code, every time. Write less, build more, ship faster.",
+    "Capy helps you turn any repo into a design system with a polished preview page. Instantly generate component catalogs, style guides, and live previews from your codebase.",
   keywords: [
     "capy",
     "AI code editor",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "MCP",
     "developer tools",
     "precision coding",
-    "AI-native editor",
+    "AI-powered editor",
   ],
   metadataBase: new URL(siteUrl),
   alternates: {
@@ -47,17 +47,26 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "Capy",
-    title: "Capy — The AI-Native Code Editor",
+    title: "Capy — Design System Generator",
     description:
-      "The AI-native code editor that gets it exactly right. No approximation. No bloat. Just perfect code, every time.",
+      "Capy helps you turn any repo into a design system with a polished preview page. Instantly generate component catalogs, style guides, and live previews.",
+    images: [
+      {
+        url: `${siteUrl}/capy.svg`,
+        width: 1200,
+        height: 630,
+        alt: "Capy Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Capy — The AI-Native Code Editor",
+    title: "Capy — Design System Generator",
     description:
-      "The AI-native code editor that gets it exactly right. No approximation. No bloat. Just perfect code, every time.",
+      "Capy helps you turn any repo into a design system with a polished preview page. Instantly generate component catalogs, style guides, and live previews.",
     site: "@anant_hq",
     creator: "@anant_hq",
+    images: [`${siteUrl}/capy.svg`],
   },
   robots: {
     index: true,
@@ -100,7 +109,7 @@ export default function RootLayout({
               "@type": "SoftwareApplication",
               name: "Capy",
               description:
-                "The AI-native code editor that gets it exactly right. No approximation. No bloat. Just perfect code, every time.",
+                "Capy helps you turn any repo into a design system with a polished preview page. Instantly generate component catalogs, style guides, and live previews.",
               url: siteUrl,
               applicationCategory: "DeveloperApplication",
               operatingSystem: "macOS",

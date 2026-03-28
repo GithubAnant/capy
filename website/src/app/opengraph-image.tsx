@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Capy — The AI-Native Code Editor";
+export const alt = "Capy — Design System Generator";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -79,7 +79,7 @@ export default async function OGImage() {
               display: "flex",
             }}
           >
-            The AI-native code editor
+            Turn any repo into a design system
           </div>
           <div
             style={{
@@ -89,7 +89,7 @@ export default async function OGImage() {
               display: "flex",
             }}
           >
-            Code with exact precision.
+            Component catalogs, style guides & live previews
           </div>
         </div>
 
