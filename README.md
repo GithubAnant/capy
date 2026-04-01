@@ -11,7 +11,9 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/capy-mcp"><img src="https://img.shields.io/npm/v/capy-mcp?style=flat-square&color=white&labelColor=171615" alt="npm" /></a>
   <a href="https://www.npmjs.com/package/capy-mcp"><img src="https://img.shields.io/npm/dm/capy-mcp?style=flat-square&color=white&labelColor=171615" alt="downloads" /></a>
-  <a href="https://github.com/GithubAnant/capy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/GithubAnant/capy?style=flat-square&color=white&labelColor=171615" alt="license" /></a>
+<a href="https://github.com/GithubAnant/capy/blob/main/LICENSE">
+  <img src="https://img.shields.io/badge/license-Apache%202.0-white?style=flat-square&labelColor=171615" alt="license" />
+</a>
 </p>
 
 <p align="center">
@@ -26,11 +28,11 @@ Capy inspects your React / Next.js repo and returns structured briefs so AI agen
 
 **Three tools:**
 
-| Tool | Purpose |
-|------|---------|
+| Tool                | Purpose                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------- |
 | `get_preview_brief` | Returns repo map, inspection plan, constraints, and a `/preview` spec for the agent to follow |
-| `get_design_system` | Writes a machine-readable design-system JSON artifact (`.capy/design-system.json`) |
-| `update_preview` | Diffs against last snapshot, refreshes the design system, returns an incremental update brief |
+| `get_design_system` | Writes a machine-readable design-system JSON artifact (`.capy/design-system.json`)            |
+| `update_preview`    | Diffs against last snapshot, refreshes the design system, returns an incremental update brief |
 
 ---
 
@@ -74,6 +76,7 @@ Or add to `~/.claude/mcp.json`:
 <summary><b>Claude Desktop</b></summary>
 
 Add to your config file:
+
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
@@ -284,6 +287,7 @@ Add to `~/.codeium/windsurf/mcp.json`:
 <summary><b>Zed</b></summary>
 
 Add to your settings file:
+
 - **macOS:** `~/.zed/settings.json`
 - **Linux:** `~/.config/zed/settings.json`
 - **Windows:** `%USERPROFILE%\AppData\Roaming\Zed\settings.json`
@@ -306,6 +310,7 @@ Add to your settings file:
 <summary><b>Antigravity</b></summary>
 
 Add to your config file:
+
 - **macOS:** `~/.gemini/antigravity/mcp_config.json`
 - **Windows:** `%USERPROFILE%\.gemini\antigravity\mcp_config.json`
 
