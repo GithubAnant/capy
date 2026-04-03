@@ -5,7 +5,7 @@
 <h1 align="center">Capy</h1>
 
 <p align="center">
-  MCP server that gives AI coding agents the context they need to build and update UI — preview pages, design-system artifacts, and incremental diffs.
+  MCP server that gives AI coding agents the context they need to build and update UI - preview pages & design-system artifacts.
 </p>
 
 <p align="center">
